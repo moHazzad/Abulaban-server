@@ -20,51 +20,74 @@ const register = async (user: TResister) => {
   return result;
 };
 
+// const login = async (loginData: TLogin) => {
+//   console.log(loginData);
+//   const { email, password } = loginData;
+//   // const user = await User.findOne({ email: payload.email }).select('+password') // we can use select if password field not in the db
+//   const user = await UserModel.findOne({ email }).select('+password');
+//   // console.log(user);
+//   if (!user) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
+//   }
+
+//   // Compare provided password with the hashed password in the database
+//   const isPasswordValid = await bcrypt.compare(password, user.password);
+//   if (!isPasswordValid) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
+//   }
+
+//   const isDeleted = user?.isDeleted;
+//   if (isDeleted) {
+//     throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
+//   }
+
+//   const jwtPayload = {
+//     email: user.email,
+//     role: user.role,
+//   };
+
+  
+//   const accessToken = createToken(
+//     jwtPayload,
+//     config.jwt_access_token as string,
+//     config.jwt_access_expires_in as string,
+//   );
+
+//   const refreshToken = createToken(
+//     jwtPayload,
+//     config.jwt_refresh_token as string,
+//     config.jwt_refresh_expires_in as string,
+//   );
+
+//    return {
+//     accessToken,
+//     refreshToken
+//    }
+
+// };
 const login = async (loginData: TLogin) => {
-  console.log(loginData);
-  const { email, password } = loginData;
-  // const user = await User.findOne({ email: payload.email }).select('+password') // we can use select if password field not in the db
+  const { email, password } = loginData.body;
   const user = await UserModel.findOne({ email }).select('+password');
-  // console.log(user);
-  if (!user) {
+  
+  if (!user || user.isDeleted) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
   }
 
-  // Compare provided password with the hashed password in the database
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
   }
 
-  const isDeleted = user?.isDeleted;
-  if (isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
-  }
-
-  const jwtPayload = {
-    email: user.email,
-    role: user.role,
-  };
-
+  const jwtPayload = { email: user.email, role: user.role };
   
-  const accessToken = createToken(
-    jwtPayload,
-    config.jwt_access_token as string,
-    config.jwt_access_expires_in as string,
-  );
+  const accessToken = createToken(jwtPayload,
+     config.jwt_access_token as string,
+     config.jwt_access_expires_in as string);
+  const refreshToken = createToken(jwtPayload, config.jwt_refresh_token as string, config.jwt_refresh_expires_in as string);
 
-  const refreshToken = createToken(
-    jwtPayload,
-    config.jwt_refresh_token as string,
-    config.jwt_refresh_expires_in as string,
-  );
-
-   return {
-    accessToken,
-    refreshToken
-   }
-
+  return { accessToken, refreshToken };
 };
+
 
 const refreshToken = async (token: string) => {
   // checking if the given token is valid

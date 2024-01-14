@@ -4,7 +4,7 @@ export interface TResister extends Omit<TUser, 'role'> {}
 
 export interface TLogin {
     body:{
-        email: string;
+    email: string;
     password: string;
     }
 
