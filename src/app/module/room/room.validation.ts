@@ -57,6 +57,7 @@ import { z } from 'zod';
 const LocalizedStringValidationSchema = z.object({
   en: z.string({ required_error: 'English text is required' }),
   ar: z.string({ required_error: 'Arabic text is required' }),
+  icon: z.string({ required_error: 'icon is required' }).optional(),
 });
 
 const PriceOptionValidationSchema = z.object({

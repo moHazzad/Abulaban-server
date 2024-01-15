@@ -11,8 +11,8 @@ import config from '../../config';
 // import userValidationSchemaZod from "./user.validation";
 
 const resister = catchAsync(async (req: Request, res: Response) => {
-  console.log(req.body.body);
-  const user = req.body.body;
+  console.log(req.body);
+  const user = req.body;
 
   //saving to db
   const result = await authUserService.register(user);
@@ -35,12 +35,12 @@ const resister = catchAsync(async (req: Request, res: Response) => {
 
 const login = catchAsync(async (req: Request, res: Response) => {
   // const { email, password } = req.body;
-  console.log(req.body,'aksdgafs');
+ 
   const loginData = req.body;
   // console.log(loginData,'chek if it got ot not ');
   const result = await authUserService.login(loginData);
 
-  const { refreshToken, accessToken,  } = result;
+  // const { refreshToken, accessToken,  } = result;
 
   res.cookie('refreshToken', refreshToken, {
     secure: config.NODE_ENV === 'production',
@@ -51,9 +51,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Login successful',
-    data: {
-      accessToken
-    },
+    data: result,
   });
 });
 

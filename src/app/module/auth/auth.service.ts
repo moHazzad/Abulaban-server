@@ -66,9 +66,9 @@ const register = async (user: TResister) => {
 
 // };
 const login = async (loginData: TLogin) => {
-  const { email, password } = loginData.body;
+  const { email, password } = loginData;
   const user = await UserModel.findOne({ email }).select('+password');
-  
+
   if (!user || user.isDeleted) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
   }
@@ -79,14 +79,28 @@ const login = async (loginData: TLogin) => {
   }
 
   const jwtPayload = { email: user.email, role: user.role };
-  
-  const accessToken = createToken(jwtPayload,
-     config.jwt_access_token as string,
-     config.jwt_access_expires_in as string);
-  const refreshToken = createToken(jwtPayload, config.jwt_refresh_token as string, config.jwt_refresh_expires_in as string);
 
-  return { accessToken, refreshToken };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_token as string,
+    config.jwt_access_expires_in as string
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_token as string,
+    config.jwt_refresh_expires_in as string
+  );
+
+  // Include additional user information in the response
+  const userInfo = {
+    fullName: `${user.firstName} ${user.lastName}`,
+    phone: user.phone,
+    email: user.email,
+  };
+
+  return { accessToken, refreshToken, user: userInfo };
 };
+
 
 
 const refreshToken = async (token: string) => {

@@ -38,7 +38,8 @@ import { TRoom } from './room.interface';
 
 const localizedFeatureSchema = new mongoose.Schema({
   en: { type: String, required: true },
-  ar: { type: String, required: true }
+  ar: { type: String, required: true },
+  icon: { type: String }
 });
 
 const priceOptionSchema = new mongoose.Schema({

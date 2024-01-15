@@ -51,6 +51,7 @@ export type PriceOption = {
 export type LocalizedString = {
   en: string;
   ar: string;
+  icon: string;
 };
 
 export type TRoom = {

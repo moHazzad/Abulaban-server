@@ -11,7 +11,7 @@ const bookingSchema = new Schema({
       ref: 'User',
       required: true,
   },
-  roomID: {
+  roomId: {
       type: Schema.Types.ObjectId,
       ref: 'Room',
       required: true,

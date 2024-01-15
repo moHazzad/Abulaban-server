@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const bookingValidationSchema = z.object({
   userID: z.string(), // You may adjust the type based on your actual user ID type
-  roomID: z.string(), // You may adjust the type based on your actual room ID type
+  roomId: z.string(), // You may adjust the type based on your actual room ID type
   checkInDate: z.string(),
   checkOutDate: z.string(),
   numberOfNights: z.number(),
