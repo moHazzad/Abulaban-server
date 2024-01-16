@@ -8,17 +8,17 @@ import cookieParser from 'cookie-parser';
 const app = express()
 
 // parser
+
+app.use(cors({
+  origin:  ['https://mutlilangualawalive.vercel.app', 'http://127.0.0.1:5173'],  // Update this to your frontend's URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  allowedHeaders: 'Content-Type,Authorization'
+}));
 app.use(express.json());
 app.use(cookieParser());
 
-// const corsOptions = {
-//   origin: ['https://mutlilangualawalive.vercel.app', 'http://127.0.0.1:5173'],
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//   credentials: true,
-//   allowedHeaders: 'Content-Type,Authorization'
-// };
 
-app.use(cors());
 
 app.use('/api', router )
 
