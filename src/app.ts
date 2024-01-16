@@ -11,12 +11,14 @@ const app = express()
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({
-  origin: 'https://mutlilangualawalive.vercel.app', // or 'http://localhost:5173', based on your front-end URL
+const corsOptions = {
+  origin: ['https://mutlilangualawalive.vercel.app', 'http://127.0.0.1:5173'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   allowedHeaders: 'Content-Type,Authorization'
-}));
+};
+
+app.use(cors(corsOptions));
 
 app.use('/api', router )
 
