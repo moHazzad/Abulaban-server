@@ -1,14 +1,24 @@
 import { z } from 'zod';
 
+const formDataSchema = z.object({
+  address: z.string().optional(),
+  arrivalTime: z.string().optional(),
+  city: z.string().optional(),
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+  message: z.string().optional(),
+  phone: z.string(),
+});
+
 export const bookingValidationSchema = z.object({
-  userID: z.string(), // You may adjust the type based on your actual user ID type
-  roomId: z.string(), // You may adjust the type based on your actual room ID type
-  checkInDate: z.string(),
-  checkOutDate: z.string(),
-  numberOfNights: z.number(),
-  totalCost: z.number(),
-  bookingStatus: z.enum(['pending', 'booked', 'cancelled']).optional(),
-  paymentStatus: z.enum(['pending', 'paid']).optional(),
-  bookRoomQTY: z.number(),
-  isCancelled: z.boolean().optional()
+  body: z.object({
+    userEmail: z.string().email(),
+    roomId: z.string(), // Assuming the ObjectId is represented as a string
+    formData: formDataSchema,
+    checkIn: z.string(),
+    checkOut: z.string(),
+    bookingStatus: z.enum(['pending', 'Booked', 'cancelled']).optional(),
+    paymentStatus: z.enum(['pending', 'paid']).optional(),
+  }),
 });
