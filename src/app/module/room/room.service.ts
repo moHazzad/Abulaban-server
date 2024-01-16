@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
-import { LocalizedString, TRoom } from "./room.interface";
+import { LanguageKey, TRoom } from "./room.interface";
 import { RoomModel } from "./room.model";
 import AppError from "../../Error/errors/AppError";
 import httpStatus from "http-status";
@@ -78,7 +78,7 @@ const createRoomInDb = async (roomData: TRoom) => {
     } catch (err: any) {
         await session.abortTransaction();
         await session.endSession();
-        console.error('Error in createRoomInDb:', err);
+        // console.error('Error in createRoomInDb:', err);
         if (err instanceof AppError) {
             throw err;
         }
@@ -95,7 +95,7 @@ const createRoomInDb = async (roomData: TRoom) => {
 //     }
 // };
 
-const findAllRoomsFromDb = async (language: keyof LocalizedString) => {
+const findAllRoomsFromDb = async (language: LanguageKey) => {
     try {
         const rooms = await RoomModel.find().populate('type').lean();
 
@@ -121,7 +121,7 @@ const findAllRoomsFromDb = async (language: keyof LocalizedString) => {
 
         return localizedRooms;
     } catch (err) {
-        console.error('Error in findAllRoomsFromDb:', err);
+        // console.error('Error in findAllRoomsFromDb:', err);
         throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve rooms.');
     }
 };
@@ -129,7 +129,7 @@ const findAllRoomsFromDb = async (language: keyof LocalizedString) => {
 
 
 
-const findSingleRoomFromDb = async (roomId:string,language: keyof LocalizedString) => {
+const findSingleRoomFromDb = async (roomId:string,language: LanguageKey) => {
     
     try {
         const room = await RoomModel.findById(roomId).populate('type').lean();

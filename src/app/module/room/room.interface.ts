@@ -29,6 +29,8 @@
 
 import mongoose from "mongoose";
 
+export type LanguageKey = 'en' | 'ar';
+
 export type PriceOption = {
   price: number;
   currency: string;

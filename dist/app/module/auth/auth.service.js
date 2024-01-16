@@ -67,7 +67,7 @@ const register = (user) => __awaiter(void 0, void 0, void 0, function* () {
 //    }
 // };
 const login = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = loginData.body;
+    const { email, password } = loginData;
     const user = yield user_model_1.UserModel.findOne({ email }).select('+password');
     if (!user || user.isDeleted) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid credentials');
@@ -79,7 +79,13 @@ const login = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const jwtPayload = { email: user.email, role: user.role };
     const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_token, config_1.default.jwt_access_expires_in);
     const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_token, config_1.default.jwt_refresh_expires_in);
-    return { accessToken, refreshToken };
+    // Include additional user information in the response
+    const userInfo = {
+        fullName: `${user.firstName} ${user.lastName}`,
+        phone: user.phone,
+        email: user.email,
+    };
+    return { accessToken, refreshToken, user: userInfo };
 });
 const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     // checking if the given token is valid

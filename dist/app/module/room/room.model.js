@@ -69,7 +69,8 @@ const http_status_1 = __importDefault(require("http-status"));
 // }, { timestamps: true });\
 const localizedFeatureSchema = new mongoose_1.default.Schema({
     en: { type: String, required: true },
-    ar: { type: String, required: true }
+    ar: { type: String, required: true },
+    icon: { type: String }
 });
 const priceOptionSchema = new mongoose_1.default.Schema({
     price: { type: Number, required: [true, 'Price is required'] },

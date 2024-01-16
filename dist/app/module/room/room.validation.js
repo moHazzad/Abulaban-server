@@ -50,6 +50,7 @@ const zod_1 = require("zod");
 const LocalizedStringValidationSchema = zod_1.z.object({
     en: zod_1.z.string({ required_error: 'English text is required' }),
     ar: zod_1.z.string({ required_error: 'Arabic text is required' }),
+    icon: zod_1.z.string({ required_error: 'icon is required' }).optional(),
 });
 const PriceOptionValidationSchema = zod_1.z.object({
     price: zod_1.z.number({ required_error: 'Price is required' }),

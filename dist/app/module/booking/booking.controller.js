@@ -19,6 +19,7 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const bookingRoom = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // console.log(req.body);
     const bookingData = req.body;
     //  console.log(req.user);
     const result = yield booking_service_1.bookingService.createBookingInDb(bookingData);

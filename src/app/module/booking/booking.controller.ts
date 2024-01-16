@@ -6,7 +6,7 @@ import httpStatus from 'http-status';
 import AppError from '../../Error/errors/AppError';
 
 const bookingRoom = catchAsync(async (req: Request, res: Response) => {
-  console.log(req.body);
+  // console.log(req.body);
   const bookingData = req.body;
   //  console.log(req.user);
   const result = await bookingService.createBookingInDb(bookingData);

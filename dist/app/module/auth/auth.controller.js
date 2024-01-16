@@ -34,8 +34,8 @@ const config_1 = __importDefault(require("../../config"));
 // import { UserModel } from "../user/user.model";
 // import userValidationSchemaZod from "./user.validation";
 const resister = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body.body);
-    const user = req.body.body;
+    console.log(req.body);
+    const user = req.body;
     //saving to db
     const result = yield auth_service_1.authUserService.register(user);
     if (!result) {
@@ -56,11 +56,10 @@ const resister = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 
 }));
 const login = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const { email, password } = req.body;
-    console.log(req.body, 'aksdgafs');
     const loginData = req.body;
     // console.log(loginData,'chek if it got ot not ');
     const result = yield auth_service_1.authUserService.login(loginData);
-    const { refreshToken, accessToken, } = result;
+    // const { refreshToken, accessToken,  } = result;
     res.cookie('refreshToken', refreshToken, {
         secure: config_1.default.NODE_ENV === 'production',
         httpOnly: true,
@@ -69,9 +68,7 @@ const login = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, 
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'Login successful',
-        data: {
-            accessToken
-        },
+        data: result,
     });
 }));
 const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

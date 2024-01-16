@@ -79,7 +79,7 @@ const createRoomInDb = (roomData) => __awaiter(void 0, void 0, void 0, function*
     catch (err) {
         yield session.abortTransaction();
         yield session.endSession();
-        console.error('Error in createRoomInDb:', err);
+        // console.error('Error in createRoomInDb:', err);
         if (err instanceof AppError_1.default) {
             throw err;
         }
@@ -113,7 +113,7 @@ const findAllRoomsFromDb = (language) => __awaiter(void 0, void 0, void 0, funct
         return localizedRooms;
     }
     catch (err) {
-        console.error('Error in findAllRoomsFromDb:', err);
+        // console.error('Error in findAllRoomsFromDb:', err);
         throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to retrieve rooms.');
     }
 });

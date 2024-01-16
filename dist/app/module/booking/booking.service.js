@@ -19,20 +19,64 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const booking_model_1 = __importDefault(require("./booking.model"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
+const room_model_1 = require("../room/room.model");
 // Function to create a new booking
+// const createBookingInDb = async (bookingData: Partial<TBooking>) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const result = await BookingModel.create([bookingData], { session });
+//     if (!result) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'NO book');
+//     }
+//     await session.commitTransaction();
+//     session.endSession();
+//     return result;
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     throw error;
+//   }
+// };
 const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, function* () {
     const session = yield mongoose_1.default.startSession();
     session.startTransaction();
     try {
+        // Retrieve the room information from the database
+        const room = yield room_model_1.RoomModel.findById(bookingData.roomId).session(session);
+        if (!room) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Room not found');
+        }
+        if (typeof bookingData.checkIn !== 'string' || typeof bookingData.checkOut !== 'string') {
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid check-in or check-out date');
+        }
+        // Calculate the number of nights
+        const checkInDate = new Date(bookingData.checkIn);
+        const checkOutDate = new Date(bookingData.checkOut);
+        const night = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24);
+        // Calculate the total price and tax
+        const roomPrice = room.priceOptions[0].price; // Assuming using the first price option
+        const totalPrice = roomPrice * night;
+        const taxRate = 0.15; // 15%
+        const tax = totalPrice * taxRate;
+        const totalWithTax = totalPrice + tax;
+        // Set calculated values in booking data
+        bookingData.night = night;
+        bookingData.numberOfGuests = room.maxGuests;
+        bookingData.tax = tax;
+        bookingData.totalPrice = totalPrice;
+        bookingData.totalWithTax = totalWithTax;
+        // Create the booking
         const result = yield booking_model_1.default.create([bookingData], { session });
         if (!result) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'NO book');
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Booking creation failed');
         }
         yield session.commitTransaction();
         session.endSession();
         return result;
     }
     catch (error) {
+        console.error("Error in createBookingInDb:", error);
         yield session.abortTransaction();
         session.endSession();
         throw error;
