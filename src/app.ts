@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-  origin: 'http://127.0.0.1:5173', // or 'http://localhost:5173', based on your front-end URL
+  origin: 'https://mutlilangualawalive.vercel.app', // or 'http://localhost:5173', based on your front-end URL
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   allowedHeaders: 'Content-Type,Authorization'
