@@ -110,10 +110,13 @@ const findAllRoomsFromDb = async (language: LanguageKey) => {
             features: room.features.map(feature => feature[language]),
             images: room.images,
             priceOptions: room.priceOptions.map(priceOption => ({
-                currency: priceOption.currency[language],
+                price: priceOption.price,
+                currency: priceOption.currency[language], // Localize the currency here
+                taxesAndCharges: priceOption.taxesAndCharges,
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
-                prepayment: priceOption.prepayment[language]
+                prepayment: priceOption.prepayment[language],
+                refundable: priceOption.refundable
             })),
             type: room.type, // Assuming this is already in the desired format
             
@@ -148,10 +151,13 @@ const findSingleRoomFromDb = async (roomId:string,language: LanguageKey) => {
             services: room.services.map(service => service[language]),
             images: room.images,
             priceOptions: room.priceOptions.map(priceOption => ({
-                currency: priceOption.currency[language],
+                price: priceOption.price,
+                currency: priceOption.currency[language], // Localize the currency here
+                taxesAndCharges: priceOption.taxesAndCharges,
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
-                prepayment: priceOption.prepayment[language]
+                prepayment: priceOption.prepayment[language],
+                refundable: priceOption.refundable
             })),
             type: room.type, // Assuming this is already in the desired format
             

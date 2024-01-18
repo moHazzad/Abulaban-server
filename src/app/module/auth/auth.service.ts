@@ -12,13 +12,38 @@ import { sendEmail } from '../../utils/sendEmail';
 // import { createToken } from './auth.utils';
 // import { json } from 'express';
 
+// const register = async (user: TResister) => {
+//   const result = await UserModel.create({
+//     ...user,
+//     role: 'user',
+//   });
+//   return result;
+// };
 const register = async (user: TResister) => {
   const result = await UserModel.create({
     ...user,
     role: 'user',
   });
+
+  // Define the welcome email subject
+  const subject = "Welcome to AWalive Hotel!";
+
+  // Define the welcome email HTML content
+  const html = `
+    <h1>Welcome to AWalive Hotel!</h1>
+    <p>Dear ${user.firstName},</p>
+    <p>Thank you for registering at AWalive Hotel. We are delighted to have you with us.</p>
+    <p>We look forward to providing you with a memorable experience.</p>
+    <p>Best regards,</p>
+    <p>The AWalive Hotel Team</p>
+  `;
+
+  // Send the welcome email
+  await sendEmail(user.email, subject, html);
+
   return result;
 };
+
 
 // const login = async (loginData: TLogin) => {
 //   console.log(loginData);
@@ -215,7 +240,7 @@ const forgetPasswordService = async (email: string) => {
     '10m',
   );
   const resetUILink = `${config.reset_pass_ui_link}?id=${user.email}&token=${resetToken} `;
-  sendEmail(user.email, resetUILink);
+  // sendEmail(user.email, resetUILink);
   console.log(resetUILink);
 };
 
