@@ -14,12 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const config_1 = __importDefault(require("../config"));
-const sendEmail = (to, html) => __awaiter(void 0, void 0, void 0, function* () {
+const sendEmail = (to, subject, html) => __awaiter(void 0, void 0, void 0, function* () {
     const transporter = nodemailer_1.default.createTransport({
         host: "smtp.gmail.com",
         port: 587,
-        secure: config_1.default.NODE_ENV === 'production',
+        secure: false, //config.NODE_ENV === 'production',
         auth: {
             // TODO: replace `user` and `pass` values from <https://forwardemail.net>
             user: "hazzadmdap@gmail.com",
@@ -27,9 +26,9 @@ const sendEmail = (to, html) => __awaiter(void 0, void 0, void 0, function* () {
         },
     });
     yield transporter.sendMail({
-        from: 'hazzadmdap@gami.com', // sender address
+        from: '"AWalive Hotel" <noreply@awalivehotel.com>', //'hazzadmdap@gami.com', sender address
         to, // list of receivers
-        subject: "Reset your password within ten mins!", // Subject line
+        subject, // Subject line
         text: "", // plain text body
         html, // html body
     });

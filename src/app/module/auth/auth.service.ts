@@ -31,7 +31,7 @@ const register = async (user: TResister) => {
   // Define the welcome email HTML content
   const html = `
     <h1>Welcome to AWalive Hotel!</h1>
-    <p>Dear ${user.firstName},</p>
+    <p>Dear ${user.email},</p>
     <p>Thank you for registering at AWalive Hotel. We are delighted to have you with us.</p>
     <p>We look forward to providing you with a memorable experience.</p>
     <p>Best regards,</p>

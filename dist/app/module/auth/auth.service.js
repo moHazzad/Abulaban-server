@@ -25,8 +25,28 @@ const auth_utils_1 = require("./auth.utils");
 const sendEmail_1 = require("../../utils/sendEmail");
 // import { createToken } from './auth.utils';
 // import { json } from 'express';
+// const register = async (user: TResister) => {
+//   const result = await UserModel.create({
+//     ...user,
+//     role: 'user',
+//   });
+//   return result;
+// };
 const register = (user) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.UserModel.create(Object.assign(Object.assign({}, user), { role: 'user' }));
+    // Define the welcome email subject
+    const subject = "Welcome to AWalive Hotel!";
+    // Define the welcome email HTML content
+    const html = `
+    <h1>Welcome to AWalive Hotel!</h1>
+    <p>Dear ${user.email},</p>
+    <p>Thank you for registering at AWalive Hotel. We are delighted to have you with us.</p>
+    <p>We look forward to providing you with a memorable experience.</p>
+    <p>Best regards,</p>
+    <p>The AWalive Hotel Team</p>
+  `;
+    // Send the welcome email
+    yield (0, sendEmail_1.sendEmail)(user.email, subject, html);
     return result;
 });
 // const login = async (loginData: TLogin) => {
@@ -166,7 +186,7 @@ const forgetPasswordService = (email) => __awaiter(void 0, void 0, void 0, funct
     };
     const resetToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_token, '10m');
     const resetUILink = `${config_1.default.reset_pass_ui_link}?id=${user.email}&token=${resetToken} `;
-    (0, sendEmail_1.sendEmail)(user.email, resetUILink);
+    // sendEmail(user.email, resetUILink);
     console.log(resetUILink);
 });
 const resetPasswordService = (payload, token) => __awaiter(void 0, void 0, void 0, function* () {
