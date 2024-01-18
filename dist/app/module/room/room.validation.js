@@ -54,7 +54,7 @@ const LocalizedStringValidationSchema = zod_1.z.object({
 });
 const PriceOptionValidationSchema = zod_1.z.object({
     price: zod_1.z.number({ required_error: 'Price is required' }),
-    currency: zod_1.z.string({ required_error: 'Currency is required' }),
+    currency: LocalizedStringValidationSchema,
     taxesAndCharges: zod_1.z.string({ required_error: 'Taxes and charges are required' }),
     breakfast: LocalizedStringValidationSchema,
     cancellation: LocalizedStringValidationSchema,

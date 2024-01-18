@@ -44,7 +44,10 @@ const localizedFeatureSchema = new mongoose.Schema({
 
 const priceOptionSchema = new mongoose.Schema({
   price: { type: Number, required: [true, 'Price is required'] },
-  currency: { type: String, required: [true, 'Currency is required'] },
+  currency: {
+    en: { type: String, required: [true, 'English Currency is required'] },
+    ar: { type: String, required: [true, 'Arabic Currency is required'] }
+  },
   taxesAndCharges: { type: String, required: [true, 'Taxes and charges are required'] },
   breakfast: {
     en: { type: String, required: [true, 'English breakfast information is required'] },

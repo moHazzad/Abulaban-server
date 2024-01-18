@@ -33,7 +33,10 @@ export type LanguageKey = 'en' | 'ar';
 
 export type PriceOption = {
   price: number;
-  currency: string;
+  currency: {
+    en: string;
+    ar: string;
+  };
   taxesAndCharges: string;
   breakfast: {
     en: string;

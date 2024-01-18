@@ -107,7 +107,12 @@ const findAllRoomsFromDb = (language) => __awaiter(void 0, void 0, void 0, funct
             size: room.size[language],
             features: room.features.map(feature => feature[language]),
             images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => (Object.assign(Object.assign({}, priceOption), { breakfast: priceOption.breakfast[language], cancellation: priceOption.cancellation[language], prepayment: priceOption.prepayment[language] }))),
+            priceOptions: room.priceOptions.map(priceOption => ({
+                currency: priceOption.currency[language],
+                breakfast: priceOption.breakfast[language],
+                cancellation: priceOption.cancellation[language],
+                prepayment: priceOption.prepayment[language]
+            })),
             type: room.type, // Assuming this is already in the desired format
         }));
         return localizedRooms;
@@ -133,7 +138,12 @@ const findSingleRoomFromDb = (roomId, language) => __awaiter(void 0, void 0, voi
             features: room.features.map(feature => feature[language]),
             services: room.services.map(service => service[language]),
             images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => (Object.assign(Object.assign({}, priceOption), { breakfast: priceOption.breakfast[language], cancellation: priceOption.cancellation[language], prepayment: priceOption.prepayment[language] }))),
+            priceOptions: room.priceOptions.map(priceOption => ({
+                currency: priceOption.currency[language],
+                breakfast: priceOption.breakfast[language],
+                cancellation: priceOption.cancellation[language],
+                prepayment: priceOption.prepayment[language]
+            })),
             type: room.type, // Assuming this is already in the desired format
         };
         return localizedRooms;

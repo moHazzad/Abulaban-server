@@ -110,7 +110,7 @@ const findAllRoomsFromDb = async (language: LanguageKey) => {
             features: room.features.map(feature => feature[language]),
             images: room.images,
             priceOptions: room.priceOptions.map(priceOption => ({
-                ...priceOption,
+                currency: priceOption.currency[language],
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
                 prepayment: priceOption.prepayment[language]
@@ -148,7 +148,7 @@ const findSingleRoomFromDb = async (roomId:string,language: LanguageKey) => {
             services: room.services.map(service => service[language]),
             images: room.images,
             priceOptions: room.priceOptions.map(priceOption => ({
-                ...priceOption,
+                currency: priceOption.currency[language],
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
                 prepayment: priceOption.prepayment[language]
