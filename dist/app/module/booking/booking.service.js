@@ -21,24 +21,6 @@ const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
 const room_model_1 = require("../room/room.model");
 const sendEmail_1 = require("../../utils/sendEmail");
-// Function to create a new booking
-// const createBookingInDb = async (bookingData: Partial<TBooking>) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-//   try {
-//     const result = await BookingModel.create([bookingData], { session });
-//     if (!result) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'NO book');
-//     }
-//     await session.commitTransaction();
-//     session.endSession();
-//     return result;
-//   } catch (error) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     throw error;
-//   }
-// };
 const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, function* () {
     const session = yield mongoose_1.default.startSession();
     session.startTransaction();
@@ -90,6 +72,63 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         throw error;
     }
 });
+const getAllBookings = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const bookings = yield booking_model_1.default.find();
+        return bookings;
+    }
+    catch (error) {
+        console.error('Error in getAllBookings:', error);
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Error retrieving bookings');
+    }
+});
+const getBookingByEmail = (email, language) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Cast the result of populate to TBookingsRoom
+        const bookings = yield booking_model_1.default.find({ userEmail: email })
+            .populate('roomId')
+            .lean();
+        if (!bookings || bookings.length === 0) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No bookings found for this email');
+        }
+        const localizedBookings = bookings.map(booking => {
+            const localizedRoom = booking.roomId ? {
+                title: booking.roomId.title[language],
+                size: booking.roomId.size[language],
+                images: booking.roomId.images,
+                // ... localize other fields as needed
+            } : null;
+            return Object.assign(Object.assign({}, booking), { roomId: localizedRoom });
+        });
+        return localizedBookings;
+    }
+    catch (error) {
+        console.error('Error in getBookingByEmail:', error);
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
+    }
+});
+// const getBookingByEmail = async (email: string, language: LanguageKey) => {
+//   const titleField = 'title[language]';
+//   const descriptionField = `description.${language}`;
+//   const sizeField = `size.${language}`;
+//   try {
+//     // const bookings = await BookingModel.find({ userEmail: email });
+//     const bookings = await BookingModel.find({ userEmail: email }).populate({
+//       path: 'roomId',
+//       select: `${titleField} ${descriptionField} ${sizeField} maxGuests  images priceOptions isActive type`,
+//     }); // Add the fields of the Room model you want to include
+//     if (!bookings || bookings.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
+//     }
+//     return bookings;
+//   } catch (error) {
+//     console.error('Error in getBookingByEmail:', error);
+//     // throw error; // Re-throw the error to handle it in the calling function
+//     throw new AppError(httpStatus.NOT_FOUND, 'Error in getBookingByEmail:')
+//   }
+// };
 exports.bookingService = {
     createBookingInDb,
+    getAllBookings,
+    getBookingByEmail
 };
