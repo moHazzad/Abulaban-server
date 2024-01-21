@@ -37,7 +37,7 @@ const isAdmin = (...requiredRoles) => {
         catch (error) {
             if (error instanceof jsonwebtoken_1.default.JsonWebTokenError) {
                 // Handle any error related to JWT validation (expired, malformed, etc.)
-                throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid or expired token. Please log in again.');
+                throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid or expired Login time. Please log in again.');
             }
             else {
                 // Handle other possible errors

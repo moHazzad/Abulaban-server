@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 
+export type TPopulatedRoom = {
+  _id: mongoose.Types.ObjectId;
+  title: { en: string; ar: string };
+  description: { en: string; ar: string };
+  size: { en: string; ar: string };
+  images: [];
+  // Add other fields as necessary
+}
+
 type formData = {
   address?: string;
   arrivalTime?: string;

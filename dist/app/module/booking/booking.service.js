@@ -20,6 +20,7 @@ const booking_model_1 = __importDefault(require("./booking.model"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
 const room_model_1 = require("../room/room.model");
+const sendEmail_1 = require("../../utils/sendEmail");
 // Function to create a new booking
 // const createBookingInDb = async (bookingData: Partial<TBooking>) => {
 //   const session = await mongoose.startSession();
@@ -47,7 +48,8 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         if (!room) {
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Room not found');
         }
-        if (typeof bookingData.checkIn !== 'string' || typeof bookingData.checkOut !== 'string') {
+        if (typeof bookingData.checkIn !== 'string' ||
+            typeof bookingData.checkOut !== 'string') {
             throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid check-in or check-out date');
         }
         // Calculate the number of nights
@@ -60,6 +62,9 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         const taxRate = 0.15; // 15%
         const tax = totalPrice * taxRate;
         const totalWithTax = totalPrice + tax;
+        // const formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // const formattedTax = tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // const formattedTotalWithTax = totalWithTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         // Set calculated values in booking data
         bookingData.night = night;
         bookingData.numberOfGuests = room.maxGuests;
@@ -71,12 +76,15 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         if (!result) {
             throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Booking creation failed');
         }
+        // If booking creation is successful, send an email
+        const bookingConfirmationHtml = `<p>Your booking for ${room.title} is pending.</p><p>Total Price: ${totalWithTax}</p>`;
+        yield (0, sendEmail_1.sendEmail)(bookingData.userEmail, 'Booking Pending', bookingConfirmationHtml);
         yield session.commitTransaction();
         session.endSession();
         return result;
     }
     catch (error) {
-        console.error("Error in createBookingInDb:", error);
+        console.error('Error in createBookingInDb:', error);
         yield session.abortTransaction();
         session.endSession();
         throw error;

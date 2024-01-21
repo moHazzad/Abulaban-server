@@ -1,34 +1,15 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { TBooking } from './booking.interface';
+import { TBooking, TPopulatedRoom,   } from './booking.interface';
 import BookingModel from './booking.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
 import { RoomModel } from '../room/room.model';
+import { sendEmail } from '../../utils/sendEmail';
+import { LanguageKey,  } from '../room/room.interface';
 
 
-// Function to create a new booking
-// const createBookingInDb = async (bookingData: Partial<TBooking>) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-
-//   try {
-//     const result = await BookingModel.create([bookingData], { session });
-//     if (!result) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'NO book');
-//     }
-
-//     await session.commitTransaction();
-//     session.endSession();
-
-//     return result;
-//   } catch (error) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     throw error;
-//   }
-// };
 const createBookingInDb = async (bookingData: Partial<TBooking>) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -39,13 +20,20 @@ const createBookingInDb = async (bookingData: Partial<TBooking>) => {
     if (!room) {
       throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
     }
-    if (typeof bookingData.checkIn !== 'string' || typeof bookingData.checkOut !== 'string') {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Invalid check-in or check-out date');
+    if (
+      typeof bookingData.checkIn !== 'string' ||
+      typeof bookingData.checkOut !== 'string'
+    ) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Invalid check-in or check-out date',
+      );
     }
     // Calculate the number of nights
     const checkInDate = new Date(bookingData.checkIn);
     const checkOutDate = new Date(bookingData.checkOut);
-    const night = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24);
+    const night =
+      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24);
 
     // Calculate the total price and tax
     const roomPrice = room.priceOptions[0].price; // Assuming using the first price option
@@ -53,6 +41,10 @@ const createBookingInDb = async (bookingData: Partial<TBooking>) => {
     const taxRate = 0.15; // 15%
     const tax = totalPrice * taxRate;
     const totalWithTax = totalPrice + tax;
+
+    // const formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // const formattedTax = tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // const formattedTotalWithTax = totalWithTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // Set calculated values in booking data
     bookingData.night = night;
@@ -67,19 +59,94 @@ const createBookingInDb = async (bookingData: Partial<TBooking>) => {
       throw new AppError(httpStatus.BAD_REQUEST, 'Booking creation failed');
     }
 
+    // If booking creation is successful, send an email
+    const bookingConfirmationHtml = `<p>Your booking for ${room.title} is pending.</p><p>Total Price: ${totalWithTax}</p>`;
+    await sendEmail(bookingData.userEmail as string, 'Booking Pending', bookingConfirmationHtml);
+
+
     await session.commitTransaction();
     session.endSession();
 
     return result;
   } catch (error) {
-    console.error("Error in createBookingInDb:", error);
+    console.error('Error in createBookingInDb:', error);
     await session.abortTransaction();
     session.endSession();
     throw error;
   }
 };
 
+const getAllBookings = async () => {
+  try {
+    const bookings = await BookingModel.find();
+    return bookings;
+  } catch (error) {
+    console.error('Error in getAllBookings:', error);
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Error retrieving bookings');
+  }
+};
+
+const getBookingByEmail = async (email: string, language: LanguageKey) => {
+  try {
+    // Cast the result of populate to TBookingsRoom
+    const bookings = await BookingModel.find({ userEmail: email })
+      .populate<{ roomId: TPopulatedRoom }>('roomId')
+      .lean();
+
+    if (!bookings || bookings.length === 0) {
+      throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
+    }
+
+    const localizedBookings = bookings.map(booking => {
+      const localizedRoom = booking.roomId ? {
+        title: booking.roomId.title[language],
+        size: booking.roomId.size[language],
+        images: booking.roomId.images,
+        // ... localize other fields as needed
+      } : null;
+
+      return {
+        ...booking,
+        roomId: localizedRoom
+      };
+    });
+
+    return localizedBookings;
+  } catch (error) {
+    console.error('Error in getBookingByEmail:', error);
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
+  }
+};
+
+
+
+
+// const getBookingByEmail = async (email: string, language: LanguageKey) => {
+//   const titleField = 'title[language]';
+//   const descriptionField = `description.${language}`;
+//   const sizeField = `size.${language}`;
+//   try {
+//     // const bookings = await BookingModel.find({ userEmail: email });
+//     const bookings = await BookingModel.find({ userEmail: email }).populate({
+//       path: 'roomId',
+//       select: `${titleField} ${descriptionField} ${sizeField} maxGuests  images priceOptions isActive type`,
+//     }); // Add the fields of the Room model you want to include
+
+//     if (!bookings || bookings.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
+//     }
+//     return bookings;
+//   } catch (error) {
+//     console.error('Error in getBookingByEmail:', error);
+//     // throw error; // Re-throw the error to handle it in the calling function
+//     throw new AppError(httpStatus.NOT_FOUND, 'Error in getBookingByEmail:')
+//   }
+// };
 
 export const bookingService = {
   createBookingInDb,
+  getAllBookings,
+  getBookingByEmail
+
+
 };
