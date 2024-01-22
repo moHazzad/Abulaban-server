@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mongoose from "mongoose";
-import { LanguageKey, TRoom } from "./room.interface";
-import { RoomModel } from "./room.model";
-import AppError from "../../Error/errors/AppError";
-import httpStatus from "http-status";
-import { CategoryModel } from "../category/category.model";
-
-
+import mongoose from 'mongoose';
+import { LanguageKey, RoomQuery, TRoom } from './room.interface';
+import { RoomModel } from './room.model';
+import AppError from '../../Error/errors/AppError';
+import httpStatus from 'http-status';
+import { CategoryModel } from '../category/category.model';
 
 // const createRoomInDb = async (roomData: TRoom) => {
 //     const session = await mongoose.startSession();
@@ -42,204 +40,257 @@ import { CategoryModel } from "../category/category.model";
 //     }
 // };
 
-
 const createRoomInDb = async (roomData: TRoom) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
-        // Check if the category exists
-        const findCategory = await CategoryModel.findById(roomData.type);
-        if (!findCategory) {
-            throw new AppError(httpStatus.NOT_FOUND, "Invalid category");
-        }
-
-        // Ensure that roomData contains multilingual fields
-        // (You might want to add more validation based on your requirements)
-        if (!roomData.title.en || !roomData.title.ar) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'Both English and Arabic room titles are required');
-        }
-
-        // Create the room
-        const room = await RoomModel.create([roomData], { session });
-
-        if (!room) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create room');
-        }
-
-        // Fetch the newly created room with populated type
-        const populatedRoom = await RoomModel.findById(room[0]._id)
-                                      .populate('type')
-                                      .session(session);
-
-        await session.commitTransaction();
-        await session.endSession();
-
-        return populatedRoom;
-    } catch (err: any) {
-        await session.abortTransaction();
-        await session.endSession();
-        // console.error('Error in createRoomInDb:', err);
-        if (err instanceof AppError) {
-            throw err;
-        }
-        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create room due to an unexpected error. Try again with valid room type.');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // Check if the category exists
+    const findCategory = await CategoryModel.findById(roomData.type);
+    if (!findCategory) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Invalid category');
     }
+
+    // Ensure that roomData contains multilingual fields
+    // (You might want to add more validation based on your requirements)
+    if (!roomData.title.en || !roomData.title.ar) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Both English and Arabic room titles are required',
+      );
+    }
+
+    // Create the room
+    const room = await RoomModel.create([roomData], { session });
+
+    if (!room) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create room');
+    }
+
+    // Fetch the newly created room with populated type
+    const populatedRoom = await RoomModel.findById(room[0]._id)
+      .populate('type')
+      .session(session);
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return populatedRoom;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    // console.error('Error in createRoomInDb:', err);
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Failed to create room due to an unexpected error. Try again with valid room type.',
+    );
+  }
 };
 
 // const findAllRoomsFromDb = async () => {
 //     try {
 //         const rooms = await RoomModel.find().populate('type');
 //         return rooms;
-//     } catch (err) {  
+//     } catch (err) {
 //         throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve rooms.');
 //     }
 // };
 
 const findAllRoomsFromDb = async (language: LanguageKey) => {
-    try {
-        const rooms = await RoomModel.find().populate('type').lean();
+  try {
+    const rooms = await RoomModel.find().populate('type').lean();
 
-        // Map over each room and construct a new object with the desired structure
-        const localizedRooms = rooms.map(room => ({
-            id: room._id,
-            title: room.title[language],
-            description: room.description[language],
-            maxGuests: room.maxGuests,
-            roomQTY: room.roomQTY,
-            size: room.size[language],
-            features: room.features.map(feature => feature[language]),
-            images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => ({
-                price: priceOption.price,
-                currency: priceOption.currency[language], // Localize the currency here
-                taxesAndCharges: priceOption.taxesAndCharges,
-                breakfast: priceOption.breakfast[language],
-                cancellation: priceOption.cancellation[language],
-                prepayment: priceOption.prepayment[language],
-                refundable: priceOption.refundable
-            })),
-            type: room.type, // Assuming this is already in the desired format
-            
-        }));
+    // Map over each room and construct a new object with the desired structure
+    const localizedRooms = rooms.map((room) => ({
+      id: room._id,
+      title: room.title[language],
+      description: room.description[language],
+      maxGuests: room.maxGuests,
+      roomQTY: room.roomQTY,
+      size: room.size[language],
+      features: room.features.map((feature) => feature[language]),
+      images: room.images,
+      priceOptions: room.priceOptions.map((priceOption) => ({
+        price: priceOption.price,
+        currency: priceOption.currency[language], // Localize the currency here
+        taxesAndCharges: priceOption.taxesAndCharges,
+        breakfast: priceOption.breakfast[language],
+        cancellation: priceOption.cancellation[language],
+        prepayment: priceOption.prepayment[language],
+        refundable: priceOption.refundable,
+      })),
+      type: room.type, // Assuming this is already in the desired format
+    }));
 
-        return localizedRooms;
-    } catch (err) {
-        // console.error('Error in findAllRoomsFromDb:', err);
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve rooms.');
-    }
+    return localizedRooms;
+  } catch (err) {
+    // console.error('Error in findAllRoomsFromDb:', err);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to retrieve rooms.',
+    );
+  }
 };
 
-
-
-
-const findSingleRoomFromDb = async (roomId:string,language: LanguageKey) => {
-    
-    try {
-        const room = await RoomModel.findById(roomId).populate('type').lean();
-        if (!room) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
-        }
-
-        const localizedRooms = {
-            id: room._id,
-            title: room.title[language],
-            description: room.description[language],
-            maxGuests: room.maxGuests,
-            roomQTY: room.roomQTY,
-            size: room.size[language],
-            features: room.features.map(feature => feature[language]),
-            services: room.services.map(service => service[language]),
-            images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => ({
-                price: priceOption.price,
-                currency: priceOption.currency[language], // Localize the currency here
-                taxesAndCharges: priceOption.taxesAndCharges,
-                breakfast: priceOption.breakfast[language],
-                cancellation: priceOption.cancellation[language],
-                prepayment: priceOption.prepayment[language],
-                refundable: priceOption.refundable
-            })),
-            type: room.type, // Assuming this is already in the desired format
-            
-        };
-
-        return localizedRooms
-    } catch (err) {
-       
-        if (err instanceof AppError) {
-            throw err;
-        }
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve the room.');
+const findSingleRoomFromDb = async (roomId: string, language: LanguageKey) => {
+  try {
+    const room = await RoomModel.findById(roomId).populate('type').lean();
+    if (!room) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
     }
+
+    const localizedRooms = {
+      id: room._id,
+      title: room.title[language],
+      description: room.description[language],
+      maxGuests: room.maxGuests,
+      roomQTY: room.roomQTY,
+      size: room.size[language],
+      features: room.features.map((feature) => feature[language]),
+      services: room.services.map((service) => service[language]),
+      images: room.images,
+      priceOptions: room.priceOptions.map((priceOption) => ({
+        price: priceOption.price,
+        currency: priceOption.currency[language], // Localize the currency here
+        taxesAndCharges: priceOption.taxesAndCharges,
+        breakfast: priceOption.breakfast[language],
+        cancellation: priceOption.cancellation[language],
+        prepayment: priceOption.prepayment[language],
+        refundable: priceOption.refundable,
+      })),
+      type: room.type, // Assuming this is already in the desired format
+    };
+
+    return localizedRooms;
+  } catch (err) {
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to retrieve the room.',
+    );
+  }
 };
 
-const updateRoomById = async (roomId: string, updateData:Partial<TRoom>) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
-        // Check if the room exists
-        const existingRoom = await RoomModel.findById(roomId).session(session);
-        if (!existingRoom) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
-        }
-
-        // Update the room
-        const updatedRoom = await RoomModel.findByIdAndUpdate(
-            roomId, 
-            { $set: updateData }, 
-            { new: true, session: session } // 'new: true' returns the updated document
-        );
-
-        await session.commitTransaction();
-        await session.endSession();
-
-        return updatedRoom;
-    } catch (err) {
-        await session.abortTransaction();
-        await session.endSession();
-        if (err instanceof AppError) {
-            throw err;
-        }
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update the room.');
+const updateRoomById = async (roomId: string, updateData: Partial<TRoom>) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // Check if the room exists
+    const existingRoom = await RoomModel.findById(roomId).session(session);
+    if (!existingRoom) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
     }
+
+    // Update the room
+    const updatedRoom = await RoomModel.findByIdAndUpdate(
+      roomId,
+      { $set: updateData },
+      { new: true, session: session }, // 'new: true' returns the updated document
+    );
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return updatedRoom;
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to update the room.',
+    );
+  }
 };
 
 const deleteRoomById = async (roomId: string) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
-        // Check if the room exists
-        const existingRoom = await RoomModel.findById(roomId).session(session);
-        if (!existingRoom) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
-        }
-
-        // Soft delete the room by updating isDeleted and isActive
-        const updatedRoom = await RoomModel.findByIdAndUpdate(
-            roomId,
-            { isDeleted: true, isActive: false },
-            { new: true, session: session }
-        );
-
-        await session.commitTransaction();
-        await session.endSession();
-
-        return updatedRoom; // Return the updated room for confirmation
-    } catch (err) {
-        await session.abortTransaction();
-        await session.endSession();
-        
-        if (err instanceof AppError) {
-            throw err;
-        }
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to delete the room.');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // Check if the room exists
+    const existingRoom = await RoomModel.findById(roomId).session(session);
+    if (!existingRoom) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
     }
+
+    // Soft delete the room by updating isDeleted and isActive
+    const updatedRoom = await RoomModel.findByIdAndUpdate(
+      roomId,
+      { isDeleted: true, isActive: false },
+      { new: true, session: session },
+    );
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return updatedRoom; // Return the updated room for confirmation
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
+
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to delete the room.',
+    );
+  }
 };
 
+const searchService = async (
+  categoryId: string,
+  maxGuests: number,
+  language: LanguageKey
+//   checkInDate: Date,
+//   checkOutDate: Date,
+) => {
+  const query: RoomQuery = {};
+
+  if (categoryId) {
+    query.type = new mongoose.Types.ObjectId(categoryId);
+  }
+
+  if (maxGuests) {
+    query.maxGuests = { $gte: maxGuests };
+  }
+
+  // Logic for check-in and check-out dates
+  // ...
 
 
-
-
+    const rooms = await RoomModel.find(query).lean().exec() ;
+    const localizedRooms = rooms.map((room) => ({
+        id: room._id,
+        title: room.title[language],
+        description: room.description[language],
+        maxGuests: room.maxGuests,
+        roomQTY: room.roomQTY,
+        size: room.size[language],
+        features: room.features.map((feature) => feature[language]),
+        images: room.images,
+        priceOptions: room.priceOptions.map((priceOption) => ({
+          price: priceOption.price,
+          currency: priceOption.currency[language], // Localize the currency here
+          taxesAndCharges: priceOption.taxesAndCharges,
+          breakfast: priceOption.breakfast[language],
+          cancellation: priceOption.cancellation[language],
+          prepayment: priceOption.prepayment[language],
+          refundable: priceOption.refundable,
+        })),
+        type: room.type, // Assuming this is already in the desired format
+      }));
+  
+      return localizedRooms;
+    // return rooms;
+  
+};
 
 // //  retrieve all user with specific field
 // const getAllUserUserFromDb = async () => {
@@ -365,9 +416,10 @@ const deleteRoomById = async (roomId: string) => {
 // }
 
 export const roomService = {
-    createRoomInDb,
-    findAllRoomsFromDb,
-    findSingleRoomFromDb,
-    updateRoomById,
-    deleteRoomById
+  createRoomInDb,
+  findAllRoomsFromDb,
+  findSingleRoomFromDb,
+  updateRoomById,
+  deleteRoomById,
+  searchService,
 };

@@ -29,6 +29,12 @@
 
 import mongoose from "mongoose";
 
+export type RoomQuery = {
+  type?: mongoose.Types.ObjectId;
+  maxGuests?: { $gte: number };
+  // Add other properties as needed, potentially with MongoDB query operators
+};
+
 export type LanguageKey = 'en' | 'ar';
 
 export type PriceOption = {

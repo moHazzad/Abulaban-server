@@ -10,7 +10,7 @@ import sendResponse from "../../utils/sendResponse";
 const createUser = catchAsync(async(req: Request, res: Response) =>{
     
     // const user = req.body
-    console.log(req.body);
+    
     //saving to db
     const result = await userService.createUserInDb(req.body)
 

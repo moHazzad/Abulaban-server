@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import { categoryService } from "./category.service";
+import AppError from "../../Error/errors/AppError";
+import httpStatus from "http-status";
+import sendResponse from "../../utils/sendResponse";
 
 
 
@@ -26,7 +29,33 @@ const createCategory = catchAsync(async(req: Request, res: Response) =>{
     }    
 
 })
+const getCategoryController = catchAsync(async(req: Request, res: Response) =>{
+    
+    const languageParam = req.query.lang;
+    const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
+                     ? languageParam 
+                     : 'en';
+    const result = await categoryService.getCategoryFromDb(language)
+
+    if (!result) {
+        throw new AppError(
+          httpStatus.NOT_FOUND,
+          'No category found.'
+        )
+          
+      } else {
+          sendResponse(res,{
+            statusCode: httpStatus.OK,
+            success: true,
+            message:" Successful",
+            data: result
+          }
+          )
+      }  
+
+})
 
 export const createCategoryController = {
-    createCategory
+    createCategory,
+    getCategoryController
 }

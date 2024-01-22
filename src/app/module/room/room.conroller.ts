@@ -111,6 +111,33 @@ const deleteSingleRoom = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
+const searchRoomController = catchAsync(async (req: Request, res: Response) => {
+  // getting user id to find the exect user and the body of update info
+
+  const categoryId = req.query.categoryId as string;
+  const checkInDate  = req.query.checkInDate ;
+  const checkOutDate   = req.query.checkOutDate  ;
+  const maxGuests = parseInt(req.query.maxGuests as string, 10) ;
+  const languageParam = req.query.lang;
+    const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
+                     ? languageParam 
+                     : 'en';
+
+  console.log(req,categoryId,checkInDate,checkOutDate,maxGuests);
+
+  const result = await roomService.searchService(categoryId, maxGuests,language );
+  if (!result || result.length === 0) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No room found');
+  } else {
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Search rooms successful',
+      data: result,
+    });
+  }
+
+});
 
 // const allUsers = catchAsync(async(req: Request, res: Response)=>{
 
@@ -286,4 +313,5 @@ export const createRoomController = {
   singleRoomById,
   updateSingleRoom,
   deleteSingleRoom,
+  searchRoomController
 };

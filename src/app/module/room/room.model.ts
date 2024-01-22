@@ -36,6 +36,8 @@ import { TRoom } from './room.interface';
 //   isActive: { type: Boolean, default: true },
 // }, { timestamps: true });\
 
+
+
 const localizedFeatureSchema = new mongoose.Schema({
   en: { type: String, required: true },
   ar: { type: String, required: true },

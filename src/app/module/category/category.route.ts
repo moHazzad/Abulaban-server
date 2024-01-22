@@ -9,6 +9,7 @@ import TRoomCategoryValidationSchema from './category.validation'
 
 const router = express.Router()
 
+router.get('/', createCategoryController.getCategoryController )
 router.post('/create', isAdmin(USER_ROLE.admin), validateRequest(TRoomCategoryValidationSchema), createCategoryController.createCategory )
 
 

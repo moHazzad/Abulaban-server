@@ -7,7 +7,7 @@ import AppError from '../../Error/errors/AppError';
 // import AppError from "../../Error/errors/appError";
 
 const createUserInDb = async (userData: TUser) => {
-  console.log(userData);
+  
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
