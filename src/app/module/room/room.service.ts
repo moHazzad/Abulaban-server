@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { LanguageKey, RoomQuery, TRoom } from './room.interface';
+import { LanguageKey, MaxGuestsType, RoomQuery, SortOrder, TRoom } from './room.interface';
 import { RoomModel } from './room.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
@@ -246,26 +246,27 @@ const deleteRoomById = async (roomId: string) => {
 
 const searchService = async (
   categoryId: string,
-  maxGuests: number,
+  maxGuests: MaxGuestsType,
+  sortOrder: SortOrder = 'asc',
   language: LanguageKey
 //   checkInDate: Date,
 //   checkOutDate: Date,
 ) => {
-  const query: RoomQuery = {};
+  const queryConditions = [];
 
   if (categoryId) {
-    query.type = new mongoose.Types.ObjectId(categoryId);
+    queryConditions.push({ type: new mongoose.Types.ObjectId(categoryId) });
   }
 
   if (maxGuests) {
-    query.maxGuests = { $gte: maxGuests };
+    queryConditions.push({ maxGuests: { $gte: maxGuests } });
   }
 
-  // Logic for check-in and check-out dates
-  // ...
+  const query = queryConditions.length > 0 ? { $or: queryConditions } : {}
+  
 
 
-    const rooms = await RoomModel.find(query).lean().exec() ;
+    const rooms = await RoomModel.find(query).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean().exec() ;
     const localizedRooms = rooms.map((room) => ({
         id: room._id,
         title: room.title[language],

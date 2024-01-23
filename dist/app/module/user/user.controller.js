@@ -21,7 +21,6 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 // import userValidationSchemaZod from "./user.validation";
 const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const user = req.body
-    console.log(req.body);
     //saving to db
     const result = yield user_service_1.userService.createUserInDb(req.body);
     if (!result) {

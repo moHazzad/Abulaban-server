@@ -56,7 +56,7 @@ const createRoomInDb = (roomData) => __awaiter(void 0, void 0, void 0, function*
         // Check if the category exists
         const findCategory = yield category_model_1.CategoryModel.findById(roomData.type);
         if (!findCategory) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Invalid category");
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Invalid category');
         }
         // Ensure that roomData contains multilingual fields
         // (You might want to add more validation based on your requirements)
@@ -90,7 +90,7 @@ const createRoomInDb = (roomData) => __awaiter(void 0, void 0, void 0, function*
 //     try {
 //         const rooms = await RoomModel.find().populate('type');
 //         return rooms;
-//     } catch (err) {  
+//     } catch (err) {
 //         throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve rooms.');
 //     }
 // };
@@ -98,23 +98,23 @@ const findAllRoomsFromDb = (language) => __awaiter(void 0, void 0, void 0, funct
     try {
         const rooms = yield room_model_1.RoomModel.find().populate('type').lean();
         // Map over each room and construct a new object with the desired structure
-        const localizedRooms = rooms.map(room => ({
+        const localizedRooms = rooms.map((room) => ({
             id: room._id,
             title: room.title[language],
             description: room.description[language],
             maxGuests: room.maxGuests,
             roomQTY: room.roomQTY,
             size: room.size[language],
-            features: room.features.map(feature => feature[language]),
+            features: room.features.map((feature) => feature[language]),
             images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => ({
+            priceOptions: room.priceOptions.map((priceOption) => ({
                 price: priceOption.price,
                 currency: priceOption.currency[language], // Localize the currency here
                 taxesAndCharges: priceOption.taxesAndCharges,
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
                 prepayment: priceOption.prepayment[language],
-                refundable: priceOption.refundable
+                refundable: priceOption.refundable,
             })),
             type: room.type, // Assuming this is already in the desired format
         }));
@@ -138,17 +138,17 @@ const findSingleRoomFromDb = (roomId, language) => __awaiter(void 0, void 0, voi
             maxGuests: room.maxGuests,
             roomQTY: room.roomQTY,
             size: room.size[language],
-            features: room.features.map(feature => feature[language]),
-            services: room.services.map(service => service[language]),
+            features: room.features.map((feature) => feature[language]),
+            services: room.services.map((service) => service[language]),
             images: room.images,
-            priceOptions: room.priceOptions.map(priceOption => ({
+            priceOptions: room.priceOptions.map((priceOption) => ({
                 price: priceOption.price,
                 currency: priceOption.currency[language], // Localize the currency here
                 taxesAndCharges: priceOption.taxesAndCharges,
                 breakfast: priceOption.breakfast[language],
                 cancellation: priceOption.cancellation[language],
                 prepayment: priceOption.prepayment[language],
-                refundable: priceOption.refundable
+                refundable: priceOption.refundable,
             })),
             type: room.type, // Assuming this is already in the desired format
         };
@@ -171,8 +171,7 @@ const updateRoomById = (roomId, updateData) => __awaiter(void 0, void 0, void 0,
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Room not found');
         }
         // Update the room
-        const updatedRoom = yield room_model_1.RoomModel.findByIdAndUpdate(roomId, { $set: updateData }, { new: true, session: session } // 'new: true' returns the updated document
-        );
+        const updatedRoom = yield room_model_1.RoomModel.findByIdAndUpdate(roomId, { $set: updateData }, { new: true, session: session });
         yield session.commitTransaction();
         yield session.endSession();
         return updatedRoom;
@@ -209,6 +208,42 @@ const deleteRoomById = (roomId) => __awaiter(void 0, void 0, void 0, function* (
         }
         throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to delete the room.');
     }
+});
+const searchService = (categoryId, maxGuests, sortOrder = 'asc', language
+//   checkInDate: Date,
+//   checkOutDate: Date,
+) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryConditions = [];
+    if (categoryId) {
+        queryConditions.push({ type: new mongoose_1.default.Types.ObjectId(categoryId) });
+    }
+    if (maxGuests) {
+        queryConditions.push({ maxGuests: { $gte: maxGuests } });
+    }
+    const query = queryConditions.length > 0 ? { $or: queryConditions } : {};
+    const rooms = yield room_model_1.RoomModel.find(query).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean().exec();
+    const localizedRooms = rooms.map((room) => ({
+        id: room._id,
+        title: room.title[language],
+        description: room.description[language],
+        maxGuests: room.maxGuests,
+        roomQTY: room.roomQTY,
+        size: room.size[language],
+        features: room.features.map((feature) => feature[language]),
+        images: room.images,
+        priceOptions: room.priceOptions.map((priceOption) => ({
+            price: priceOption.price,
+            currency: priceOption.currency[language], // Localize the currency here
+            taxesAndCharges: priceOption.taxesAndCharges,
+            breakfast: priceOption.breakfast[language],
+            cancellation: priceOption.cancellation[language],
+            prepayment: priceOption.prepayment[language],
+            refundable: priceOption.refundable,
+        })),
+        type: room.type, // Assuming this is already in the desired format
+    }));
+    return localizedRooms;
+    // return rooms;
 });
 // //  retrieve all user with specific field
 // const getAllUserUserFromDb = async () => {
@@ -317,5 +352,6 @@ exports.roomService = {
     findAllRoomsFromDb,
     findSingleRoomFromDb,
     updateRoomById,
-    deleteRoomById
+    deleteRoomById,
+    searchService,
 };

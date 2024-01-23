@@ -31,7 +31,6 @@ const user_model_1 = require("./user.model");
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 // import AppError from "../../Error/errors/appError";
 const createUserInDb = (userData) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(userData);
     const session = yield mongoose_1.default.startSession();
     session.startTransaction();
     try {

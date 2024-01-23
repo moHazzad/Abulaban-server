@@ -35,6 +35,9 @@ export type RoomQuery = {
   // Add other properties as needed, potentially with MongoDB query operators
 };
 
+export type SortOrder = 'asc' | 'desc';
+export type MaxGuestsType = number | null;
+
 export type LanguageKey = 'en' | 'ar';
 
 export type PriceOption = {

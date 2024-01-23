@@ -11,5 +11,6 @@ const validateRequest_1 = require("../../midleware/validateRequest");
 const category_controller_1 = require("./category.controller");
 const category_validation_1 = __importDefault(require("./category.validation"));
 const router = express_1.default.Router();
+router.get('/', category_controller_1.createCategoryController.getCategoryController);
 router.post('/create', (0, isAdmin_1.default)(user_contents_1.USER_ROLE.admin), (0, validateRequest_1.validateRequest)(category_validation_1.default), category_controller_1.createCategoryController.createCategory);
 exports.CategoryRoute = router;

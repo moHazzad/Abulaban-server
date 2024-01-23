@@ -111,6 +111,40 @@ const deleteSingleRoom = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         });
     }
 }));
+const searchRoomController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // getting user id to find the exect user and the body of update info
+    const categoryId = req.query.categoryId;
+    const checkInDate = req.query.checkInDate;
+    const checkOutDate = req.query.checkOutDate;
+    const languageParam = req.query.lang;
+    const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar'))
+        ? languageParam
+        : 'en';
+    const maxGuestsParam = req.query.maxGuests;
+    const maxGuests = maxGuestsParam ? parseInt(maxGuestsParam, 10) : null;
+    // Check for NaN in case of invalid number input
+    // if (maxGuestsParam && isNaN(maxGuests)) {
+    //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
+    // }
+    // Sorting order parameter
+    const sortOrder = req.query.sortOrder;
+    if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
+    }
+    console.log(req, categoryId, checkInDate, checkOutDate, maxGuests);
+    const result = yield room_service_1.roomService.searchService(categoryId, maxGuests, sortOrder, language);
+    if (!result || result.length === 0) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No room found');
+    }
+    else {
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
+            success: true,
+            message: 'Search rooms successful',
+            data: result,
+        });
+    }
+}));
 // const allUsers = catchAsync(async(req: Request, res: Response)=>{
 //         const users = await userService.getAllUserUserFromDb()
 //         if (!users) {
@@ -264,4 +298,5 @@ exports.createRoomController = {
     singleRoomById,
     updateSingleRoom,
     deleteSingleRoom,
+    searchRoomController
 };

@@ -47,12 +47,16 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         // const formattedTotalPrice = totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         // const formattedTax = tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         // const formattedTotalWithTax = totalWithTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // Format the prices to have 2 decimal places
+        const formattedTotalPrice = parseFloat(totalPrice.toFixed(2));
+        const formattedTax = parseFloat(tax.toFixed(2));
+        const formattedTotalWithTax = parseFloat(totalWithTax.toFixed(2));
         // Set calculated values in booking data
         bookingData.night = night;
         bookingData.numberOfGuests = room.maxGuests;
-        bookingData.tax = tax;
-        bookingData.totalPrice = totalPrice;
-        bookingData.totalWithTax = totalWithTax;
+        bookingData.tax = formattedTax;
+        bookingData.totalPrice = formattedTotalPrice;
+        bookingData.totalWithTax = formattedTotalWithTax;
         // Create the booking
         const result = yield booking_model_1.default.create([bookingData], { session });
         if (!result) {

@@ -11,6 +11,7 @@ const room_validation_1 = __importDefault(require("./room.validation"));
 const isAdmin_1 = __importDefault(require("../../midleware/isAdmin"));
 const user_contents_1 = require("../../conestants/user.contents");
 const router = express_1.default.Router();
+router.get('/search', room_conroller_1.createRoomController.searchRoomController);
 router.post('/create', (0, isAdmin_1.default)(user_contents_1.USER_ROLE.admin), (0, validateRequest_1.validateRequest)(room_validation_1.default), room_conroller_1.createRoomController.createRoom);
 router.get('/', room_conroller_1.createRoomController.findAllRooms);
 router.get('/:id', room_conroller_1.createRoomController.singleRoomById);

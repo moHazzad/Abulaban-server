@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createCategoryController = void 0;
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const category_service_1 = require("./category.service");
+const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
+const http_status_1 = __importDefault(require("http-status"));
+const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log(req.body);
     //saving to db
@@ -36,6 +39,25 @@ const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         });
     }
 }));
+const getCategoryController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const languageParam = req.query.lang;
+    const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar'))
+        ? languageParam
+        : 'en';
+    const result = yield category_service_1.categoryService.getCategoryFromDb(language);
+    if (!result) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No category found.');
+    }
+    else {
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
+            success: true,
+            message: " Successful",
+            data: result
+        });
+    }
+}));
 exports.createCategoryController = {
-    createCategory
+    createCategory,
+    getCategoryController
 };

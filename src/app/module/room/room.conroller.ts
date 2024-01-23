@@ -6,6 +6,7 @@ import { roomService } from './room.service';
 import httpStatus from 'http-status';
 import AppError from '../../Error/errors/AppError';
 import sendResponse from '../../utils/sendResponse';
+import { MaxGuestsType, SortOrder } from './room.interface';
 
 const createRoom = catchAsync(async (req: Request, res: Response) => {
   // console.log(req.body);
@@ -117,15 +118,28 @@ const searchRoomController = catchAsync(async (req: Request, res: Response) => {
   const categoryId = req.query.categoryId as string;
   const checkInDate  = req.query.checkInDate ;
   const checkOutDate   = req.query.checkOutDate  ;
-  const maxGuests = parseInt(req.query.maxGuests as string, 10) ;
+  
   const languageParam = req.query.lang;
     const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
                      ? languageParam 
                      : 'en';
+const maxGuestsParam = req.query.maxGuests;
+  const maxGuests: MaxGuestsType = maxGuestsParam ? parseInt(maxGuestsParam as string, 10) : null;
+
+  // Check for NaN in case of invalid number input
+  // if (maxGuestsParam && isNaN(maxGuests)) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
+  // }
+                     // Sorting order parameter
+  const sortOrder = req.query.sortOrder as SortOrder;
+  if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
+    
+  }
 
   console.log(req,categoryId,checkInDate,checkOutDate,maxGuests);
 
-  const result = await roomService.searchService(categoryId, maxGuests,language );
+  const result = await roomService.searchService(categoryId, maxGuests,sortOrder,language,  );
   if (!result || result.length === 0) {
     throw new AppError(httpStatus.NOT_FOUND, 'No room found');
   } else {
