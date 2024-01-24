@@ -126,6 +126,8 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
 
 
 
+
+
 // const getBookingByEmail = async (email: string, language: LanguageKey) => {
 //   const titleField = 'title[language]';
 //   const descriptionField = `description.${language}`;
@@ -151,7 +153,8 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
 export const bookingService = {
   createBookingInDb,
   getAllBookings,
-  getBookingByEmail
+  getBookingByEmail,
+  
 
 
 };

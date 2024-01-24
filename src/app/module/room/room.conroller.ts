@@ -153,6 +153,62 @@ const maxGuestsParam = req.query.maxGuests;
 
 });
 
+
+const availableRoomController = catchAsync(async (req: Request, res: Response) => {
+  // getting user id to find the exect user and the body of update info
+
+  // const categoryId = req.query.categoryId as string;
+//   const convertDateToISO = (dateStr: string) => {
+//     const parts = dateStr.split('/');
+//     const year = parts[2];
+//     const month = parts[0].padStart(2, '0'); // Ensure month is 2 digits
+//     const day = parts[1].padStart(2, '0'); // Ensure day is 2 digits
+//     return `${year}-${month}-${day}`;
+// };
+
+const checkInDate  = req.query.checkInDate as string ;
+const checkOutDate   =  req.query.checkOutDate as string ;
+// const fcheckInDate  = new Date(checkInDate)  ;
+// const fcheckOutDate   =  new Date(checkOutDate) ;
+// const checkInDateISO = convertDateToISO(checkInDate);
+// const checkOutDateISO = convertDateToISO(checkOutDate);
+  
+//   const languageParam = req.query.lang;
+//     const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
+//                      ? languageParam 
+//                      : 'en';
+// const maxGuestsParam = req.query.maxGuests;
+//   const maxGuests: MaxGuestsType = maxGuestsParam ? parseInt(maxGuestsParam as string, 10) : null;
+
+  // Check for NaN in case of invalid number input
+  // if (maxGuestsParam && isNaN(maxGuests)) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
+  // }
+
+
+                     // Sorting order parameter
+  // const sortOrder = req.query.sortOrder as SortOrder;
+  // if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
+    
+  // }
+
+  console.log(checkInDate,checkOutDate, "room availavle ");
+
+  const result = await roomService.checkAllRoomAvailability( checkInDate,checkOutDate );
+  if (!result || result.length === 0) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No available room found');
+  } else {
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Search available rooms successful',
+      data: result,
+    });
+  }
+
+});
+
 // const allUsers = catchAsync(async(req: Request, res: Response)=>{
 
 //         const users = await userService.getAllUserUserFromDb()
@@ -327,5 +383,6 @@ export const createRoomController = {
   singleRoomById,
   updateSingleRoom,
   deleteSingleRoom,
-  searchRoomController
+  searchRoomController,
+  availableRoomController
 };

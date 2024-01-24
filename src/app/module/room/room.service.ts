@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { LanguageKey, MaxGuestsType, RoomQuery, SortOrder, TRoom } from './room.interface';
+import { LanguageKey, MaxGuestsType,  SortOrder, TRoom } from './room.interface';
 import { RoomModel } from './room.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
@@ -293,6 +293,159 @@ const searchService = async (
   
 };
 
+const checkAllRoomAvailability = async (checkInDateStr : string, checkOutDateStr: string ) => {
+  console.log(checkInDateStr,checkOutDateStr,'service ' );
+
+  // const availableRooms = await RoomModel.aggregate([
+  //     {
+  //         $lookup: {
+  //             from: "bookings",
+  //             let: { roomId: "$_id" },
+  //             pipeline: [
+  //                 {
+  //                     // $match: {
+  //                     //     $expr: {
+  //                     //         $and: [
+  //                     //             { $eq: ["$room", "$$roomId"] },
+  //                     //             { $or: [
+  //                     //                 { $and: [{ $gte: ["$checkInDate", new Date(checkInDate)], $lt: ["$checkInDate", new Date(checkOutDate)] }] },
+  //                     //                 { $and: [{ $gt: ["$checkOutDate", new Date(checkInDate)], $lte: ["$checkOutDate", new Date(checkOutDate)] }] }
+  //                     //             ]}
+  //                     //         ]
+  //                     //     }
+  //                     // }
+  //                   //   $match: {
+  //                   //     $expr: {
+  //                   //         $and: [
+  //                   //             { $eq: ["$room", "$$roomId"] },
+  //                   //             { $or: [
+  //                   //                 { $and: [{ $gte: ["$checkInDate", checkInDateStr], $lt: ["$checkInDate", checkOutDateStr] }] },
+  //                   //                 { $and: [{ $gt: ["$checkOutDate", checkInDateStr], $lte: ["$checkOutDate", checkOutDateStr] }] }
+  //                   //             ]}
+  //                   //         ]
+  //                   //     }
+  //                   // }
+  //                   $match: {
+  //                     $expr: {
+  //                         $and: [
+  //                             { $eq: ["$room", "$$roomId"] },
+  //                             { $or: [
+  //                                 { 
+  //                                     $and: [
+  //                                         { $gte: ["$checkIn", { $dateFromString: { dateString: checkInDateStr, format: "%Y/%m/%d" } }] },
+  //                                         { $lt: ["$checkIn", { $dateFromString: { dateString: checkOutDateStr, format: "%Y/%m/%d" } }] }
+  //                                     ]
+  //                                 },
+  //                                 { 
+  //                                     $and: [
+  //                                         { $gt: ["$checkOut", { $dateFromString: { dateString: checkInDateStr, format: "%Y/%m/%d" } }] },
+  //                                         { $lte: ["$checkOut", { $dateFromString: { dateString: checkOutDateStr, format: "%Y/%m/%d" } }] }
+  //                                     ]
+  //                                 }
+  //                             ]}
+  //                         ]
+  //                     }
+  //                 }
+  //                 },
+  //                 { $group: { _id: "$room", bookingCount: { $sum: 1 } } }
+  //             ],
+  //             as: "bookings"
+  //         }
+  //     },
+  //     {
+  //         $project: {
+  //             title: 1,
+  //             roomQTY: 1,
+  //             bookings: 1,
+  //             availableQty: {
+  //                 $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
+  //             }
+  //             // ... include other fields you need
+  //         }
+  //     },
+  //     { $match: { availableQty: { $gt: 0 } } }
+  // ]);
+  const availableRooms = await RoomModel.aggregate([
+    {
+      $lookup: {
+          from: "bookings",
+          let: { roomId: "$_id" },
+          pipeline: [
+              {
+                  $match: {
+                      $expr: {
+                          $and: [
+                              { $eq: ["$roomId", "$$roomId"] },
+                              {
+                                  $or: [
+                                      { $and: [{ $lte: ["$checkIn", checkInDateStr] }, { $gt: ["$checkOut", checkInDateStr] }] },
+                                      { $and: [{ $lt: ["$checkIn", checkOutDateStr] }, { $gte: ["$checkOut", checkInDateStr] }] }
+                                  ]
+                              }
+                          ]
+                      }
+                  }
+              },
+              { $group: { _id: "$roomId", bookingCount: { $sum: 1 } } }
+          ],
+          as: "bookings"
+      }
+  },
+  {
+      $project: {
+          title: 1,
+          roomQTY: 1,
+          bookings: 1,
+          availableQty: {
+              $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
+          }
+      }
+  },
+  { $match: { availableQty: { $gt: 0 } } }
+  ])
+
+  return availableRooms;
+};
+
+// const checkAllRoomAvailability = async (checkInDate:string , checkOutDate:string) => {
+//   const availableRooms = await RoomModel.aggregate([
+//       {
+//           $lookup: {
+//               from: "bookings",
+//               let: { roomId: "$_id" },
+//               pipeline: [
+//                   {
+//                       $match: {
+//                           $expr: {
+//                               $and: [
+//                                   { $eq: ["$room", "$$roomId"] },
+//                                   { $lt: ["$checkInDate", checkOutDate] },
+//                                   { $gt: ["$checkOutDate", checkInDate] }
+//                               ]
+//                           }
+//                       }
+//                   },
+//                   { $group: { _id: "$room", bookingCount: { $sum: 1 } } }
+//               ],
+//               as: "bookings"
+//           }
+//       },
+//       {
+//           $project: {
+//               title: 1,
+//               roomQTY: 1,
+//               availableQty: {
+//                   $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
+//               }
+//               // ... include other fields you need
+//           }
+//       },
+//       { $match: { availableQty: { $gt: 0 } } } // Filter out rooms with no available quantity
+//   ]);
+
+//   return availableRooms;
+// };
+
 // //  retrieve all user with specific field
 // const getAllUserUserFromDb = async () => {
 //   const result = await UserModel.aggregate([
@@ -423,4 +576,5 @@ export const roomService = {
   updateRoomById,
   deleteRoomById,
   searchService,
+  checkAllRoomAvailability
 };

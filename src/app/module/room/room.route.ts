@@ -8,6 +8,7 @@ import { USER_ROLE } from "../../conestants/user.contents";
 
 const router = express.Router()
 
+router.get('/available',  createRoomController.availableRoomController)
 router.get('/search',  createRoomController.searchRoomController)
 router.post('/create', isAdmin(USER_ROLE.admin), validateRequest(RoomValidationSchema), createRoomController.createRoom )
 router.get('/',  createRoomController.findAllRooms )
