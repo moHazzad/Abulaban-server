@@ -209,149 +209,146 @@ const deleteRoomById = (roomId) => __awaiter(void 0, void 0, void 0, function* (
         throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to delete the room.');
     }
 });
-const searchService = (categoryId, maxGuests, sortOrder = 'asc', language
-//   checkInDate: Date,
-//   checkOutDate: Date,
-) => __awaiter(void 0, void 0, void 0, function* () {
-    const queryConditions = [];
-    if (categoryId) {
-        queryConditions.push({ type: new mongoose_1.default.Types.ObjectId(categoryId) });
-    }
-    if (maxGuests) {
-        queryConditions.push({ maxGuests: { $gte: maxGuests } });
-    }
-    const query = queryConditions.length > 0 ? { $or: queryConditions } : {};
-    const rooms = yield room_model_1.RoomModel.find(query).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean().exec();
-    const localizedRooms = rooms.map((room) => ({
-        id: room._id,
-        title: room.title[language],
-        description: room.description[language],
-        maxGuests: room.maxGuests,
-        roomQTY: room.roomQTY,
-        size: room.size[language],
-        features: room.features.map((feature) => feature[language]),
-        images: room.images,
-        priceOptions: room.priceOptions.map((priceOption) => ({
-            price: priceOption.price,
-            currency: priceOption.currency[language], // Localize the currency here
-            taxesAndCharges: priceOption.taxesAndCharges,
-            breakfast: priceOption.breakfast[language],
-            cancellation: priceOption.cancellation[language],
-            prepayment: priceOption.prepayment[language],
-            refundable: priceOption.refundable,
-        })),
-        type: room.type, // Assuming this is already in the desired format
-    }));
-    return localizedRooms;
-    // return rooms;
-});
-// //  retrieve all user with specific field
-// const getAllUserUserFromDb = async () => {
-//   const result = await UserModel.aggregate([
-//     {
-//       $addFields: {
-//         fullName: { $concat: ['$firstName', ' ', '$lastName'] },
-//       },
-//     },
-//     {
-//       $project: {
-//         username: 1,
-//         fullName: 1,
-//         email: 1,
-//       },
-//     },
-//   ]);
-//   return result;
-// };
-// const getSingleUserById = async (userId: string) => {
-//   const result = await UserModel.findById(userId); //finding by _id
-//   return result;
-// };
-// const updateUserInformation = async (
-//   userId: string,
-//   updateInfo: Partial<TUser>,
+// const searchService = async (
+//   categoryId: string,
+//   // maxGuests: MaxGuestsType,
+//   sortOrder: SortOrder = 'asc',
+//   language: LanguageKey,
+//   //   checkInDate: Date,
+//   //   checkOutDate: Date,
 // ) => {
-//   const { ...updateUserInfoPayload } = updateInfo;
-//   const modifiedUpdatedData: Record<string, unknown> = {
-//     ...updateUserInfoPayload,
-//   };
-//   if (updateUserInformation && Object.keys(updateUserInformation).length) {
-//     for (const [key, value] of Object.entries(updateUserInformation)) {
-//       modifiedUpdatedData[`name.${key}`] = value;
-//     }
+//   const queryConditions = [];
+//   if (categoryId) {
+//     queryConditions.push({ type: new mongoose.Types.ObjectId(categoryId) });
 //   }
-//   const result = await UserModel.findOneAndUpdate(
-//     { _id: userId },
-//     modifiedUpdatedData,
-//     { new: true, runValidators: true },
-//   );
-//   return result;
+//   // if (maxGuests) {
+//   //   queryConditions.push({ maxGuests: { $gte: maxGuests } });
+//   // }
+//   const query = queryConditions.length > 0 ? { $or: queryConditions } : {};
+//   const rooms = await RoomModel.find(query)
+//     .sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 })
+//     .lean()
+//     .exec();
+//   const localizedRooms = rooms.map((room) => ({
+//     id: room._id,
+//     title: room.title[language],
+//     description: room.description[language],
+//     maxGuests: room.maxGuests,
+//     roomQTY: room.roomQTY,
+//     size: room.size[language],
+//     features: room.features.map((feature) => feature[language]),
+//     images: room.images,
+//     priceOptions: room.priceOptions.map((priceOption) => ({
+//       price: priceOption.price,
+//       currency: priceOption.currency[language], // Localize the currency here
+//       taxesAndCharges: priceOption.taxesAndCharges,
+//       breakfast: priceOption.breakfast[language],
+//       cancellation: priceOption.cancellation[language],
+//       prepayment: priceOption.prepayment[language],
+//       refundable: priceOption.refundable,
+//     })),
+//     type: room.type, // Assuming this is already in the desired format
+//   }));
+//   return localizedRooms;
+//   // return rooms;
 // };
-// const deleteUser = async (userId: string) => {
-//   const session = await mongoose.startSession();
-//   try {
-//     session.startTransaction();
-//     const deletedUser = await UserModel.findByIdAndUpdate(
-//       userId,
-//       { isDeleted: true, isActive: false },
-//       { new: true, session },
-//     );
-//     if (!deletedUser) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user');
-//     }
-//     await session.commitTransaction();
-//     await session.endSession();
-//     return deletedUser;
-//   } catch (err) {
-//     await session.abortTransaction();
-//     await session.endSession();
-//     throw new Error('Failed to delete student');
-//   }
-// };
-// // order
-// // add order to the user
-// const addOrderToUser = async (userId:number,orderData:object  )=>{
-//     const user = await getSingleUserById(userId);
-//     // Check if user is not null
-//     if (!user) {
-//         throw new Error('User not found');
-//     }
-//     if (!user.orders) {
-//         user.orders = [];
-//     }
-//     user.orders.push(orderData);
-//     // Save the updated user
-//     await user.save();
-//     return user;
-// }
-// const getSingleUserOrderFromDb =async (userId: number) => {
-//     const user = await getSingleUserById(userId);
-//     if (!user) {
-//         return user
-//     } else{
-//         if (!user?.orders || user?.orders?.length === 0) {
-//         // if the orders array is empty
-//         return;
-//     }
-//     return user.orders;
-//     }
-// }
-// const getSingleUserTotalPriceFromDb = async(userId:number)=>{
-//     const userOrders = await getSingleUserOrderFromDb(userId);
-//     // Check if userOrders is an array (which means there are orders) or an object with a 'message' key (no orders or user not found)
-//     if (Array.isArray(userOrders)) {
-//         const totalPrice = userOrders.reduce((sum, order) => sum + (order.price || 0), 0);
-//         return { totalPrice };
-//     } else {
-//         // Return the message from getSingleUserOrderFromDb (no orders or user not found)
-//         return userOrders;
-//     }
-// }
+const checkAllRoomAvailability = (checkInDateStr, checkOutDateStr, sortOrder = 'asc', language, maxGuests, categoryId) => __awaiter(void 0, void 0, void 0, function* () {
+    // Build a condition object for category
+    const categoryCondition = categoryId ? { type: new mongoose_1.default.Types.ObjectId(categoryId) } : {};
+    const availableRooms = yield room_model_1.RoomModel.aggregate([
+        {
+            $lookup: {
+                from: 'bookings',
+                let: { roomId: '$_id' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ['$roomId', '$$roomId'] },
+                                    {
+                                        $or: [
+                                            {
+                                                $and: [
+                                                    { $lte: ['$checkIn', checkInDateStr] },
+                                                    { $gt: ['$checkOut', checkInDateStr] },
+                                                ],
+                                            },
+                                            {
+                                                $and: [
+                                                    { $lt: ['$checkIn', checkOutDateStr] },
+                                                    { $gte: ['$checkOut', checkInDateStr] },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                    { $group: { _id: '$roomId', bookingCount: { $sum: 1 } } },
+                ],
+                as: 'bookings',
+            },
+        },
+        {
+            $project: {
+                // title: 1,
+                // roomQTY: 1,
+                _id: 1,
+                bookings: 1,
+                maxGuests: 1,
+                // type:1,
+                availableQty: {
+                    $subtract: [
+                        '$roomQTY',
+                        { $ifNull: [{ $arrayElemAt: ['$bookings.bookingCount', 0] }, 0] },
+                    ],
+                },
+            },
+        },
+        { $match: { availableQty: { $gt: 0 }, maxGuests: { $gte: maxGuests } } },
+    ]);
+    // Extract IDs for fetching room details
+    const roomIds = availableRooms.map(room => room._id);
+    // Step 2: Retrieve full room details for the available rooms
+    const roomsDetails = yield room_model_1.RoomModel.find(Object.assign({ _id: { $in: roomIds }, maxGuests: { $gte: maxGuests } }, categoryCondition)).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean();
+    // Step 3: Combine the available quantities with localized room details
+    const localizedRooms = roomsDetails.map(room => {
+        // Find the corresponding availableQty for this room
+        const roomAvailability = availableRooms.find(ar => ar._id.equals(room._id));
+        const availableQty = roomAvailability ? roomAvailability.availableQty : 0;
+        return {
+            id: room._id,
+            title: room.title[language],
+            description: room.description[language],
+            maxGuests: room.maxGuests,
+            roomQTY: room.roomQTY,
+            availableQty, // include the availableQty
+            size: room.size[language],
+            features: room.features.map(feature => feature[language]),
+            images: room.images,
+            priceOptions: room.priceOptions.map(priceOption => ({
+                price: priceOption.price,
+                currency: priceOption.currency[language],
+                taxesAndCharges: priceOption.taxesAndCharges,
+                breakfast: priceOption.breakfast[language],
+                cancellation: priceOption.cancellation[language],
+                prepayment: priceOption.prepayment[language],
+                refundable: priceOption.refundable,
+            })),
+            type: room.type,
+        };
+    });
+    return localizedRooms;
+    // return availableRooms;
+});
 exports.roomService = {
     createRoomInDb,
     findAllRoomsFromDb,
     findSingleRoomFromDb,
     updateRoomById,
     deleteRoomById,
-    searchService,
+    // searchService,
+    checkAllRoomAvailability,
 };

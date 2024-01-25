@@ -134,5 +134,5 @@ const getBookingByEmail = (email, language) => __awaiter(void 0, void 0, void 0,
 exports.bookingService = {
     createBookingInDb,
     getAllBookings,
-    getBookingByEmail
+    getBookingByEmail,
 };
