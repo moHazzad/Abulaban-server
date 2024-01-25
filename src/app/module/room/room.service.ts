@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { LanguageKey, MaxGuestsType,  SortOrder, TRoom } from './room.interface';
+import { LanguageKey, SortOrder, TRoom } from './room.interface';
 import { RoomModel } from './room.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
@@ -244,330 +244,164 @@ const deleteRoomById = async (roomId: string) => {
   }
 };
 
-const searchService = async (
-  categoryId: string,
-  maxGuests: MaxGuestsType,
+// const searchService = async (
+//   categoryId: string,
+//   // maxGuests: MaxGuestsType,
+//   sortOrder: SortOrder = 'asc',
+//   language: LanguageKey,
+//   //   checkInDate: Date,
+//   //   checkOutDate: Date,
+// ) => {
+//   const queryConditions = [];
+
+//   if (categoryId) {
+//     queryConditions.push({ type: new mongoose.Types.ObjectId(categoryId) });
+//   }
+
+//   // if (maxGuests) {
+//   //   queryConditions.push({ maxGuests: { $gte: maxGuests } });
+//   // }
+
+//   const query = queryConditions.length > 0 ? { $or: queryConditions } : {};
+
+//   const rooms = await RoomModel.find(query)
+//     .sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 })
+//     .lean()
+//     .exec();
+//   const localizedRooms = rooms.map((room) => ({
+//     id: room._id,
+//     title: room.title[language],
+//     description: room.description[language],
+//     maxGuests: room.maxGuests,
+//     roomQTY: room.roomQTY,
+//     size: room.size[language],
+//     features: room.features.map((feature) => feature[language]),
+//     images: room.images,
+//     priceOptions: room.priceOptions.map((priceOption) => ({
+//       price: priceOption.price,
+//       currency: priceOption.currency[language], // Localize the currency here
+//       taxesAndCharges: priceOption.taxesAndCharges,
+//       breakfast: priceOption.breakfast[language],
+//       cancellation: priceOption.cancellation[language],
+//       prepayment: priceOption.prepayment[language],
+//       refundable: priceOption.refundable,
+//     })),
+//     type: room.type, // Assuming this is already in the desired format
+//   }));
+
+//   return localizedRooms;
+//   // return rooms;
+// };
+
+const checkAllRoomAvailability = async (
+  checkInDateStr: string,
+  checkOutDateStr: string,
   sortOrder: SortOrder = 'asc',
-  language: LanguageKey
-//   checkInDate: Date,
-//   checkOutDate: Date,
+  language: LanguageKey,
+  maxGuests: number,
+  categoryId: string
 ) => {
-  const queryConditions = [];
 
-  if (categoryId) {
-    queryConditions.push({ type: new mongoose.Types.ObjectId(categoryId) });
-  }
 
-  if (maxGuests) {
-    queryConditions.push({ maxGuests: { $gte: maxGuests } });
-  }
-
-  const query = queryConditions.length > 0 ? { $or: queryConditions } : {}
+   // Build a condition object for category
+   const categoryCondition = categoryId ? { type: new mongoose.Types.ObjectId(categoryId) } : {};
   
 
-
-    const rooms = await RoomModel.find(query).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean().exec() ;
-    const localizedRooms = rooms.map((room) => ({
-        id: room._id,
-        title: room.title[language],
-        description: room.description[language],
-        maxGuests: room.maxGuests,
-        roomQTY: room.roomQTY,
-        size: room.size[language],
-        features: room.features.map((feature) => feature[language]),
-        images: room.images,
-        priceOptions: room.priceOptions.map((priceOption) => ({
-          price: priceOption.price,
-          currency: priceOption.currency[language], // Localize the currency here
-          taxesAndCharges: priceOption.taxesAndCharges,
-          breakfast: priceOption.breakfast[language],
-          cancellation: priceOption.cancellation[language],
-          prepayment: priceOption.prepayment[language],
-          refundable: priceOption.refundable,
-        })),
-        type: room.type, // Assuming this is already in the desired format
-      }));
-  
-      return localizedRooms;
-    // return rooms;
-  
-};
-
-const checkAllRoomAvailability = async (checkInDateStr : string, checkOutDateStr: string ) => {
-  console.log(checkInDateStr,checkOutDateStr,'service ' );
-
-  // const availableRooms = await RoomModel.aggregate([
-  //     {
-  //         $lookup: {
-  //             from: "bookings",
-  //             let: { roomId: "$_id" },
-  //             pipeline: [
-  //                 {
-  //                     // $match: {
-  //                     //     $expr: {
-  //                     //         $and: [
-  //                     //             { $eq: ["$room", "$$roomId"] },
-  //                     //             { $or: [
-  //                     //                 { $and: [{ $gte: ["$checkInDate", new Date(checkInDate)], $lt: ["$checkInDate", new Date(checkOutDate)] }] },
-  //                     //                 { $and: [{ $gt: ["$checkOutDate", new Date(checkInDate)], $lte: ["$checkOutDate", new Date(checkOutDate)] }] }
-  //                     //             ]}
-  //                     //         ]
-  //                     //     }
-  //                     // }
-  //                   //   $match: {
-  //                   //     $expr: {
-  //                   //         $and: [
-  //                   //             { $eq: ["$room", "$$roomId"] },
-  //                   //             { $or: [
-  //                   //                 { $and: [{ $gte: ["$checkInDate", checkInDateStr], $lt: ["$checkInDate", checkOutDateStr] }] },
-  //                   //                 { $and: [{ $gt: ["$checkOutDate", checkInDateStr], $lte: ["$checkOutDate", checkOutDateStr] }] }
-  //                   //             ]}
-  //                   //         ]
-  //                   //     }
-  //                   // }
-  //                   $match: {
-  //                     $expr: {
-  //                         $and: [
-  //                             { $eq: ["$room", "$$roomId"] },
-  //                             { $or: [
-  //                                 { 
-  //                                     $and: [
-  //                                         { $gte: ["$checkIn", { $dateFromString: { dateString: checkInDateStr, format: "%Y/%m/%d" } }] },
-  //                                         { $lt: ["$checkIn", { $dateFromString: { dateString: checkOutDateStr, format: "%Y/%m/%d" } }] }
-  //                                     ]
-  //                                 },
-  //                                 { 
-  //                                     $and: [
-  //                                         { $gt: ["$checkOut", { $dateFromString: { dateString: checkInDateStr, format: "%Y/%m/%d" } }] },
-  //                                         { $lte: ["$checkOut", { $dateFromString: { dateString: checkOutDateStr, format: "%Y/%m/%d" } }] }
-  //                                     ]
-  //                                 }
-  //                             ]}
-  //                         ]
-  //                     }
-  //                 }
-  //                 },
-  //                 { $group: { _id: "$room", bookingCount: { $sum: 1 } } }
-  //             ],
-  //             as: "bookings"
-  //         }
-  //     },
-  //     {
-  //         $project: {
-  //             title: 1,
-  //             roomQTY: 1,
-  //             bookings: 1,
-  //             availableQty: {
-  //                 $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
-  //             }
-  //             // ... include other fields you need
-  //         }
-  //     },
-  //     { $match: { availableQty: { $gt: 0 } } }
-  // ]);
   const availableRooms = await RoomModel.aggregate([
     {
       $lookup: {
-          from: "bookings",
-          let: { roomId: "$_id" },
-          pipeline: [
-              {
-                  $match: {
-                      $expr: {
-                          $and: [
-                              { $eq: ["$roomId", "$$roomId"] },
-                              {
-                                  $or: [
-                                      { $and: [{ $lte: ["$checkIn", checkInDateStr] }, { $gt: ["$checkOut", checkInDateStr] }] },
-                                      { $and: [{ $lt: ["$checkIn", checkOutDateStr] }, { $gte: ["$checkOut", checkInDateStr] }] }
-                                  ]
-                              }
-                          ]
-                      }
-                  }
+        from: 'bookings',
+        let: { roomId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$roomId', '$$roomId'] },
+                  {
+                    $or: [
+                      {
+                        $and: [
+                          { $lte: ['$checkIn', checkInDateStr] },
+                          { $gt: ['$checkOut', checkInDateStr] },
+                        ],
+                      },
+                      {
+                        $and: [
+                          { $lt: ['$checkIn', checkOutDateStr] },
+                          { $gte: ['$checkOut', checkInDateStr] },
+                        ],
+                      },
+                    ],
+                  },
+                ],
               },
-              { $group: { _id: "$roomId", bookingCount: { $sum: 1 } } }
-          ],
-          as: "bookings"
-      }
-  },
-  {
+            },
+          },
+          { $group: { _id: '$roomId', bookingCount: { $sum: 1 } } },
+        ],
+        as: 'bookings',
+      },
+    },
+    {
       $project: {
-          title: 1,
-          roomQTY: 1,
-          bookings: 1,
-          availableQty: {
-              $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
-          }
-      }
-  },
-  { $match: { availableQty: { $gt: 0 } } }
-  ])
+        // title: 1,
+        // roomQTY: 1,
+        _id: 1, 
+        bookings: 1,
+        maxGuests:1,
+        // type:1,
+        availableQty: {
+          $subtract: [
+            '$roomQTY',
+            { $ifNull: [{ $arrayElemAt: ['$bookings.bookingCount', 0] }, 0] },
+          ],
+        },
+      },
+    },
+    { $match: { availableQty: { $gt: 0 },maxGuests: { $gte: maxGuests } } },
+  ]);
 
-  return availableRooms;
+  // Extract IDs for fetching room details
+  const roomIds = availableRooms.map(room => room._id);
+
+  // Step 2: Retrieve full room details for the available rooms
+  const roomsDetails = await RoomModel.find({ _id: { $in: roomIds },maxGuests: { $gte: maxGuests }, ...categoryCondition}).sort({ 'priceOptions.price': sortOrder === 'asc' ? 1 : -1 }).lean();
+
+  // Step 3: Combine the available quantities with localized room details
+  const localizedRooms = roomsDetails.map(room => {
+    // Find the corresponding availableQty for this room
+    const roomAvailability = availableRooms.find(ar => ar._id.equals(room._id));
+    const availableQty = roomAvailability ? roomAvailability.availableQty : 0;
+
+    return {
+      id: room._id,
+      title: room.title[language],
+      description: room.description[language],
+      maxGuests: room.maxGuests,
+      roomQTY: room.roomQTY,
+      availableQty, // include the availableQty
+      size: room.size[language],
+      features: room.features.map(feature => feature[language]),
+      images: room.images,
+      priceOptions: room.priceOptions.map(priceOption => ({
+        price: priceOption.price,
+        currency: priceOption.currency[language],
+        taxesAndCharges: priceOption.taxesAndCharges,
+        breakfast: priceOption.breakfast[language],
+        cancellation: priceOption.cancellation[language],
+        prepayment: priceOption.prepayment[language],
+        refundable: priceOption.refundable,
+      })),
+      type: room.type,
+    };
+  });
+
+  
+
+  return localizedRooms;
+  // return availableRooms;
 };
-
-// const checkAllRoomAvailability = async (checkInDate:string , checkOutDate:string) => {
-//   const availableRooms = await RoomModel.aggregate([
-//       {
-//           $lookup: {
-//               from: "bookings",
-//               let: { roomId: "$_id" },
-//               pipeline: [
-//                   {
-//                       $match: {
-//                           $expr: {
-//                               $and: [
-//                                   { $eq: ["$room", "$$roomId"] },
-//                                   { $lt: ["$checkInDate", checkOutDate] },
-//                                   { $gt: ["$checkOutDate", checkInDate] }
-//                               ]
-//                           }
-//                       }
-//                   },
-//                   { $group: { _id: "$room", bookingCount: { $sum: 1 } } }
-//               ],
-//               as: "bookings"
-//           }
-//       },
-//       {
-//           $project: {
-//               title: 1,
-//               roomQTY: 1,
-//               availableQty: {
-//                   $subtract: ["$roomQTY", { $ifNull: [{ $arrayElemAt: ["$bookings.bookingCount", 0] }, 0] }]
-//               }
-//               // ... include other fields you need
-//           }
-//       },
-//       { $match: { availableQty: { $gt: 0 } } } // Filter out rooms with no available quantity
-//   ]);
-
-//   return availableRooms;
-// };
-
-// //  retrieve all user with specific field
-// const getAllUserUserFromDb = async () => {
-//   const result = await UserModel.aggregate([
-//     {
-//       $addFields: {
-//         fullName: { $concat: ['$firstName', ' ', '$lastName'] },
-//       },
-//     },
-//     {
-//       $project: {
-//         username: 1,
-//         fullName: 1,
-//         email: 1,
-//       },
-//     },
-//   ]);
-//   return result;
-// };
-
-// const getSingleUserById = async (userId: string) => {
-//   const result = await UserModel.findById(userId); //finding by _id
-//   return result;
-// };
-
-// const updateUserInformation = async (
-//   userId: string,
-//   updateInfo: Partial<TUser>,
-// ) => {
-//   const { ...updateUserInfoPayload } = updateInfo;
-//   const modifiedUpdatedData: Record<string, unknown> = {
-//     ...updateUserInfoPayload,
-//   };
-
-//   if (updateUserInformation && Object.keys(updateUserInformation).length) {
-//     for (const [key, value] of Object.entries(updateUserInformation)) {
-//       modifiedUpdatedData[`name.${key}`] = value;
-//     }
-//   }
-
-//   const result = await UserModel.findOneAndUpdate(
-//     { _id: userId },
-//     modifiedUpdatedData,
-//     { new: true, runValidators: true },
-//   );
-//   return result;
-// };
-
-// const deleteUser = async (userId: string) => {
-//   const session = await mongoose.startSession();
-//   try {
-//     session.startTransaction();
-//     const deletedUser = await UserModel.findByIdAndUpdate(
-//       userId,
-//       { isDeleted: true, isActive: false },
-//       { new: true, session },
-//     );
-
-//     if (!deletedUser) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user');
-//     }
-
-//     await session.commitTransaction();
-//     await session.endSession();
-
-//     return deletedUser;
-
-//   } catch (err) {
-//     await session.abortTransaction();
-//     await session.endSession();
-//     throw new Error('Failed to delete student');
-//   }
-// };
-
-// // order
-// // add order to the user
-// const addOrderToUser = async (userId:number,orderData:object  )=>{
-
-//     const user = await getSingleUserById(userId);
-
-//     // Check if user is not null
-//     if (!user) {
-//         throw new Error('User not found');
-//     }
-//     if (!user.orders) {
-//         user.orders = [];
-//     }
-
-//     user.orders.push(orderData);
-
-//     // Save the updated user
-//     await user.save();
-
-//     return user;
-
-// }
-
-// const getSingleUserOrderFromDb =async (userId: number) => {
-//     const user = await getSingleUserById(userId);
-//     if (!user) {
-//         return user
-//     } else{
-//         if (!user?.orders || user?.orders?.length === 0) {
-//         // if the orders array is empty
-//         return;
-//     }
-//     return user.orders;
-//     }
-
-// }
-
-// const getSingleUserTotalPriceFromDb = async(userId:number)=>{
-//     const userOrders = await getSingleUserOrderFromDb(userId);
-
-//     // Check if userOrders is an array (which means there are orders) or an object with a 'message' key (no orders or user not found)
-//     if (Array.isArray(userOrders)) {
-//         const totalPrice = userOrders.reduce((sum, order) => sum + (order.price || 0), 0);
-//         return { totalPrice };
-//     } else {
-//         // Return the message from getSingleUserOrderFromDb (no orders or user not found)
-//         return userOrders;
-//     }
-// }
 
 export const roomService = {
   createRoomInDb,
@@ -575,6 +409,6 @@ export const roomService = {
   findSingleRoomFromDb,
   updateRoomById,
   deleteRoomById,
-  searchService,
-  checkAllRoomAvailability
+  // searchService,
+  checkAllRoomAvailability,
 };

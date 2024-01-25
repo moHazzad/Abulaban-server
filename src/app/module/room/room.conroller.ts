@@ -6,7 +6,7 @@ import { roomService } from './room.service';
 import httpStatus from 'http-status';
 import AppError from '../../Error/errors/AppError';
 import sendResponse from '../../utils/sendResponse';
-import { MaxGuestsType, SortOrder } from './room.interface';
+import { LanguageKey, SortOrder } from './room.interface';
 
 const createRoom = catchAsync(async (req: Request, res: Response) => {
   // console.log(req.body);
@@ -112,90 +112,65 @@ const deleteSingleRoom = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
-const searchRoomController = catchAsync(async (req: Request, res: Response) => {
-  // getting user id to find the exect user and the body of update info
+// const searchRoomController = catchAsync(async (req: Request, res: Response) => {
+//   // getting user id to find the exect user and the body of update info
 
-  const categoryId = req.query.categoryId as string;
-  const checkInDate  = req.query.checkInDate ;
-  const checkOutDate   = req.query.checkOutDate  ;
-  
-  const languageParam = req.query.lang;
-    const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
-                     ? languageParam 
-                     : 'en';
-const maxGuestsParam = req.query.maxGuests;
-  const maxGuests: MaxGuestsType = maxGuestsParam ? parseInt(maxGuestsParam as string, 10) : null;
-
-  // Check for NaN in case of invalid number input
-  // if (maxGuestsParam && isNaN(maxGuests)) {
-  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
-  // }
-                     // Sorting order parameter
-  const sortOrder = req.query.sortOrder as SortOrder;
-  if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
-    throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
-    
-  }
-
-  console.log(req,categoryId,checkInDate,checkOutDate,maxGuests);
-
-  const result = await roomService.searchService(categoryId, maxGuests,sortOrder,language,  );
-  if (!result || result.length === 0) {
-    throw new AppError(httpStatus.NOT_FOUND, 'No room found');
-  } else {
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Search rooms successful',
-      data: result,
-    });
-  }
-
-});
-
-
-const availableRoomController = catchAsync(async (req: Request, res: Response) => {
-  // getting user id to find the exect user and the body of update info
-
-  // const categoryId = req.query.categoryId as string;
-//   const convertDateToISO = (dateStr: string) => {
-//     const parts = dateStr.split('/');
-//     const year = parts[2];
-//     const month = parts[0].padStart(2, '0'); // Ensure month is 2 digits
-//     const day = parts[1].padStart(2, '0'); // Ensure day is 2 digits
-//     return `${year}-${month}-${day}`;
-// };
-
-const checkInDate  = req.query.checkInDate as string ;
-const checkOutDate   =  req.query.checkOutDate as string ;
-// const fcheckInDate  = new Date(checkInDate)  ;
-// const fcheckOutDate   =  new Date(checkOutDate) ;
-// const checkInDateISO = convertDateToISO(checkInDate);
-// const checkOutDateISO = convertDateToISO(checkOutDate);
+//   const categoryId = req.query.categoryId as string;
+//   // const checkInDate  = req.query.checkInDate ;
+//   // const checkOutDate   = req.query.checkOutDate  ;
   
 //   const languageParam = req.query.lang;
 //     const language = (typeof languageParam === 'string' && (languageParam === 'en' || languageParam === 'ar')) 
 //                      ? languageParam 
 //                      : 'en';
-// const maxGuestsParam = req.query.maxGuests;
-//   const maxGuests: MaxGuestsType = maxGuestsParam ? parseInt(maxGuestsParam as string, 10) : null;
+// // const maxGuestsParam = req.query.maxGuests;
+//   // const maxGuests: MaxGuestsType = maxGuestsParam ? parseInt(maxGuestsParam as string, 10) : null;
 
-  // Check for NaN in case of invalid number input
-  // if (maxGuestsParam && isNaN(maxGuests)) {
-  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
-  // }
-
-
-                     // Sorting order parameter
-  // const sortOrder = req.query.sortOrder as SortOrder;
-  // if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
-  //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
+//   // Check for NaN in case of invalid number input
+//   // if (maxGuestsParam && isNaN(maxGuests)) {
+//   //   throw new AppError(httpStatus.BAD_REQUEST, "Invalid maxGuests parameter.");
+//   // }
+//                      // Sorting order parameter
+//   const sortOrder = req.query.sortOrder as SortOrder;
+//   if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
+//     throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
     
-  // }
+//   }
 
-  console.log(checkInDate,checkOutDate, "room availavle ");
+//   console.log(req,categoryId,checkInDate,checkOutDate,maxGuests);
 
-  const result = await roomService.checkAllRoomAvailability( checkInDate,checkOutDate );
+//   const result = await roomService.searchService(categoryId,sortOrder,language,  );
+//   if (!result || result.length === 0) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'No room found');
+//   } else {
+//     sendResponse(res, {
+//       statusCode: httpStatus.OK,
+//       success: true,
+//       message: 'Search rooms successful',
+//       data: result,
+//     });
+//   }
+
+// });
+
+
+const availableRoomController = catchAsync(async (req: Request, res: Response) => {
+ 
+const language = req.query.lang as LanguageKey;
+const checkInDate  = req.query.checkInDate as string ;
+const checkOutDate   =  req.query.checkOutDate as string ;
+const sortOrder = req.query.sortOrder as SortOrder;
+const maxGuestsParam = req.query.maxGuests;
+const categoryId = req.query.categoryId as string;
+const maxGuests  =  parseInt(maxGuestsParam as string, 10);
+
+  if (sortOrder && sortOrder !== 'asc' && sortOrder !== 'desc') {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid sortOrder parameter. Must be 'asc' or 'desc'.");
+    
+  }
+
+
+  const result = await roomService.checkAllRoomAvailability( checkInDate,checkOutDate,sortOrder, language, maxGuests, categoryId );
   if (!result || result.length === 0) {
     throw new AppError(httpStatus.NOT_FOUND, 'No available room found');
   } else {
@@ -383,6 +358,6 @@ export const createRoomController = {
   singleRoomById,
   updateSingleRoom,
   deleteSingleRoom,
-  searchRoomController,
+  // searchRoomController,
   availableRoomController
 };
