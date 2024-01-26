@@ -16,7 +16,7 @@ const BedroomInfoSchema = z.object({
   const TRoomCategoryValidationSchema = z.object({
     body: z.object({
       categoryTitle: LocalizedStringSchema, // Updated to use LocalizedStringSchema
-      bedrooms: z.array(BedroomInfoSchema)
+      bedrooms: z.array(BedroomInfoSchema).optional()
     })
   });
   

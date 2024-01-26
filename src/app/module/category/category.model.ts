@@ -11,7 +11,7 @@ const localizedFeatureSchema = new mongoose.Schema({
 });
 
 const BedroomInfoSchema = new Schema({
-  bedroomNumber: { type: Number, required: true },
+  bedroomNumber: { type: Number },
   beds: localizedFeatureSchema
 });
 

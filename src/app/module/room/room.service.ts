@@ -106,6 +106,10 @@ const findAllRoomsFromDb = async (language: LanguageKey) => {
     const localizedRooms = rooms.map((room) => ({
       id: room._id,
       title: room.title[language],
+      subTitle: room.subTitle ? {
+        roomOne: room.subTitle.roomOne[language],
+        roomTwo: room.subTitle.roomTwo ? room.subTitle.roomTwo[language] : undefined,
+      } : undefined,
       description: room.description[language],
       maxGuests: room.maxGuests,
       roomQTY: room.roomQTY,
@@ -144,6 +148,10 @@ const findSingleRoomFromDb = async (roomId: string, language: LanguageKey) => {
     const localizedRooms = {
       id: room._id,
       title: room.title[language],
+      subTitle: room.subTitle ? {
+        roomOne: room.subTitle.roomOne[language],
+        roomTwo: room.subTitle.roomTwo ? room.subTitle.roomTwo[language] : undefined,
+      } : undefined,
       description: room.description[language],
       maxGuests: room.maxGuests,
       roomQTY: room.roomQTY,

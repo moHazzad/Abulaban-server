@@ -1,32 +1,5 @@
 /* eslint-disable no-unused-vars */
 
-// import mongoose from "mongoose";
-
-
-
-
-// export type PriceOption = {
-//   price: number;
-//   currency: string;
-//   taxesAndCharges: number;
-//   breakfast: string;
-//   cancellation: string;
-//   prepayment: string;
-//   refundable: boolean;
-// };
-
-// export type TRoom = {
-//   title: string;
-//   type: mongoose.Schema.Types.ObjectId;
-//   description: string;
-//   maxGuests: number;
-//   roomQTY: number;
-//   size: string;
-//   features: string[];
-//   images: string[];
-//   priceOptions: PriceOption[];
-// };
-
 import mongoose from "mongoose";
 
 export type RoomQuery = {
@@ -39,6 +12,12 @@ export type SortOrder = 'asc' | 'desc';
 // export type MaxGuestsType = number | null;
 
 export type LanguageKey = 'en' | 'ar';
+
+export type LocalizedString = {
+  en: string;
+  ar: string;
+  icon: string;
+};
 
 export type PriceOption = {
   price: number;
@@ -62,14 +41,14 @@ export type PriceOption = {
   refundable: boolean;
 };
 
-export type LocalizedString = {
-  en: string;
-  ar: string;
-  icon: string;
+export type SubTitle = {
+  roomOne: LocalizedString;
+  roomTwo?: LocalizedString; // Optional
 };
 
 export type TRoom = {
   title: LocalizedString;
+  subTitle: SubTitle;
   type: mongoose.Schema.Types.ObjectId;
   description: LocalizedString;
   maxGuests: number;

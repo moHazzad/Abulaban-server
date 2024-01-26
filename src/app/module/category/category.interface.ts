@@ -11,7 +11,7 @@ export type BedroomInfo = {
 
 export type TRoomCategory = {
   categoryTitle: LocalizedString; // Updated to support localization
-  bedrooms: BedroomInfo[];
+  bedrooms?: BedroomInfo[];
 };
 
 

@@ -9,7 +9,7 @@ import sendResponse from '../../utils/sendResponse';
 import { LanguageKey, SortOrder } from './room.interface';
 
 const createRoom = catchAsync(async (req: Request, res: Response) => {
-  // console.log(req.body);
+  
   //saving to db
   const result = await roomService.createRoomInDb(req.body);
 

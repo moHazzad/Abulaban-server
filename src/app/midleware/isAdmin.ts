@@ -32,7 +32,7 @@ const isAdmin = (...requiredRoles: TUserRole[]) => {
         throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid or expired Login time. Please log in again.');
       } else {
         // Handle other possible errors
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'An error occurred while processing your request.');
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'You are not authorized to access this resource.');
       }
     }
   });
