@@ -98,6 +98,16 @@ const roomSchema = new mongoose_1.default.Schema({
         en: { type: String, required: [true, 'English room title is required'] },
         ar: { type: String, required: [true, 'Arabic room title is required'] }
     },
+    subTitle: {
+        roomOne: {
+            en: { type: String, required: [true, 'English subtitle for room one is required'] },
+            ar: { type: String, required: [true, 'Arabic subtitle for room one is required'] }
+        },
+        roomTwo: {
+            en: { type: String, required: false },
+            ar: { type: String, required: false }
+        }
+    },
     description: {
         en: { type: String, required: [true, 'English room description is required'] },
         ar: { type: String, required: [true, 'Arabic room description is required'] }

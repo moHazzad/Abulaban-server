@@ -101,6 +101,10 @@ const findAllRoomsFromDb = (language) => __awaiter(void 0, void 0, void 0, funct
         const localizedRooms = rooms.map((room) => ({
             id: room._id,
             title: room.title[language],
+            subTitle: room.subTitle ? {
+                roomOne: room.subTitle.roomOne[language],
+                roomTwo: room.subTitle.roomTwo ? room.subTitle.roomTwo[language] : undefined,
+            } : undefined,
             description: room.description[language],
             maxGuests: room.maxGuests,
             roomQTY: room.roomQTY,
@@ -134,6 +138,10 @@ const findSingleRoomFromDb = (roomId, language) => __awaiter(void 0, void 0, voi
         const localizedRooms = {
             id: room._id,
             title: room.title[language],
+            subTitle: room.subTitle ? {
+                roomOne: room.subTitle.roomOne[language],
+                roomTwo: room.subTitle.roomTwo ? room.subTitle.roomTwo[language] : undefined,
+            } : undefined,
             description: room.description[language],
             maxGuests: room.maxGuests,
             roomQTY: room.roomQTY,

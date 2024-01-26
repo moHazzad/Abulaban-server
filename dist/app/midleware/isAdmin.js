@@ -41,7 +41,7 @@ const isAdmin = (...requiredRoles) => {
             }
             else {
                 // Handle other possible errors
-                throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'An error occurred while processing your request.');
+                throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'You are not authorized to access this resource.');
             }
         }
     }));

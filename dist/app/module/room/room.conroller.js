@@ -20,7 +20,6 @@ const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const createRoom = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log(req.body);
     //saving to db
     const result = yield room_service_1.roomService.createRoomInDb(req.body);
     if (!result) {

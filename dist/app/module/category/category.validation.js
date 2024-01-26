@@ -13,7 +13,7 @@ const BedroomInfoSchema = zod_1.z.object({
 const TRoomCategoryValidationSchema = zod_1.z.object({
     body: zod_1.z.object({
         categoryTitle: LocalizedStringSchema, // Updated to use LocalizedStringSchema
-        bedrooms: zod_1.z.array(BedroomInfoSchema)
+        bedrooms: zod_1.z.array(BedroomInfoSchema).optional()
     })
 });
 exports.default = TRoomCategoryValidationSchema;

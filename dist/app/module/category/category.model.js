@@ -45,7 +45,7 @@ const localizedFeatureSchema = new mongoose_1.default.Schema({
     ar: { type: String, required: [true, 'Ar category title is required'] }
 });
 const BedroomInfoSchema = new mongoose_1.Schema({
-    bedroomNumber: { type: Number, required: true },
+    bedroomNumber: { type: Number },
     beds: localizedFeatureSchema
 });
 // Define RoomCategorySchema
