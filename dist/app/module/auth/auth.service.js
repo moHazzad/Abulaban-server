@@ -101,6 +101,7 @@ const login = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
     const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_token, config_1.default.jwt_refresh_expires_in);
     // Include additional user information in the response
     const userInfo = {
+        id: user._id,
         fullName: `${user.firstName} ${user.lastName}`,
         phone: user.phone,
         email: user.email,

@@ -129,7 +129,7 @@ const roomSchema = new mongoose_1.default.Schema({
         ref: 'Category',
         required: true,
     }
-}, { timestamps: true });
+}, { timestamps: true, });
 roomSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         // console.log(`Checking for existing room with type: ${this.type}, maxGuests: ${this.maxGuests}`);

@@ -40,7 +40,10 @@ const userSchema = new mongoose.Schema({
   address: { type: userAddressSchema, required: false },
   
   
-}, { timestamps: true });
+}, { timestamps: true,
+  toJSON: { virtuals: true }, 
+  toObject: { virtuals: true }
+});
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {

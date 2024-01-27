@@ -118,6 +118,7 @@ const login = async (loginData: TLogin) => {
 
   // Include additional user information in the response
   const userInfo = {
+    id: user._id,
     fullName: `${user.firstName} ${user.lastName}`,
     phone: user.phone,
     email: user.email,
@@ -208,7 +209,7 @@ const changePasswordService = async (userData: JwtPayload,  payload: { oldPasswo
 };
 
 const forgetPasswordService = async (email: string) => {
-  console.log(email);
+  
   // checking if the user is exist
   const user = await UserModel.findOne({email});
 

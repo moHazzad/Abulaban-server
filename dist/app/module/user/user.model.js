@@ -72,7 +72,10 @@ const userSchema = new mongoose_1.default.Schema({
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
     address: { type: userAddressSchema, required: false },
-}, { timestamps: true });
+}, { timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
 userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.isModified('password')) {
