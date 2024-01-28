@@ -34,9 +34,12 @@ const createReview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     }
 }));
 const getSingleRoomReview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const roomId = (req.params.roomId);
+    const { roomId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    // const roomId = (req.params.roomId);
     //saving to db
-    const result = yield review_service_1.reviewService.getReviewsFromDb(roomId);
+    const result = yield review_service_1.reviewService.getReviewsFromDb(roomId, page, limit);
     if (!result) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Review is not Not posted Please Tray again');
     }

@@ -165,7 +165,6 @@ const changePasswordService = (userData, payload) => __awaiter(void 0, void 0, v
     return { message: 'Password changed successfully' };
 });
 const forgetPasswordService = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(email);
     // checking if the user is exist
     const user = yield user_model_1.UserModel.findOne({ email });
     if (!user) {
