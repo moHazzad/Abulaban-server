@@ -27,7 +27,12 @@ const reviewSchema = new Schema({
     min: [1, 'Rating must be at least 1'],
     max: [5, 'Rating cannot be more than 5']
   }
-}, { timestamps: true });
+}, { timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+
 
 export const ReviewModel = mongoose.model<TReview>('Review', reviewSchema);
 

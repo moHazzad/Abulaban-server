@@ -25,10 +25,12 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 
 const getSingleRoomReview = catchAsync(async (req: Request, res: Response) => {
-
-  const roomId = (req.params.roomId);
+  const { roomId } = req.params;
+  const page = parseInt(req.query.page as string) || 1 ;
+  const limit = parseInt(req.query.limit as string) || 5;
+  // const roomId = (req.params.roomId);
     //saving to db
-    const result = await reviewService.getReviewsFromDb(roomId);
+    const result = await reviewService.getReviewsFromDb(roomId, page, limit);
   
     if (!result) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Review is not Not posted Please Tray again');
