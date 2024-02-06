@@ -66,7 +66,7 @@ const createBookingInDb = async (bookingData: Partial<TBooking>) => {
 
     // If booking creation is successful, send an email
     const bookingConfirmationHtml = `<p>Your booking for ${room.title} is pending.</p><p>Total Price: ${totalWithTax}</p>`;
-    await sendEmail(bookingData.userEmail as string, 'Booking Pending', bookingConfirmationHtml);
+    await sendEmail(bookingData.userEmail as string, 'You have booked', bookingConfirmationHtml);
 
 
     await session.commitTransaction();
@@ -96,17 +96,32 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
     // Cast the result of populate to TBookingsRoom
     const bookings = await BookingModel.find({ userEmail: email })
       .populate<{ roomId: TPopulatedRoom }>('roomId')
+      .sort({ createdAt: -1 }) 
       .lean();
-
+      
     if (!bookings || bookings.length === 0) {
       throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
     }
+      for (const booking of bookings) {
+        if (new Date(booking.checkOut).getTime() < Date.now() && booking.bookingStatus !== 'completed') {
+          booking.bookingStatus = 'completed';
+          // Update the booking in the database
+          await BookingModel.updateOne({ _id: booking._id }, { $set: { bookingStatus: 'completed' } });
+          // Note: If working within a session or transaction, make sure to pass those as options to the updateOne call
+        }
+      }
+
 
     const localizedBookings = bookings.map(booking => {
       const localizedRoom = booking.roomId ? {
         title: booking.roomId.title[language],
         size: booking.roomId.size[language],
         images: booking.roomId.images,
+        subTitle: booking.roomId.subTitle ? {
+          roomOne: booking.roomId.subTitle.roomOne[language],
+          roomTwo: booking.roomId.subTitle.roomTwo && booking.roomId.subTitle.roomTwo[language],
+        } : undefined,
+
         // ... localize other fields as needed
       } : null;
 
@@ -118,7 +133,7 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
 
     return localizedBookings;
   } catch (error) {
-    console.error('Error in getBookingByEmail:', error);
+    
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
   }
 };

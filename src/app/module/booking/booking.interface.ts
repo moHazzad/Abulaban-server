@@ -6,6 +6,12 @@ export type TPopulatedRoom = {
   description: { en: string; ar: string };
   size: { en: string; ar: string };
   images: [];
+  subTitle:{
+    roomOne:{en: string; ar: string };
+    roomTwo?:{en: string; ar: string };
+
+  }
+
   // Add other fields as necessary
 }
 
@@ -32,7 +38,7 @@ export type TBooking = {
   tax: number;
   totalPrice: number;
   totalWithTax: number;
-  bookingStatus: 'pending' | 'Booked' | 'cancelled';
+  bookingStatus:  'Booked' | 'cancelled' | 'completed';
   paymentStatus: 'pending' | 'paid';
 };
 

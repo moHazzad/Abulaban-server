@@ -18,7 +18,7 @@ export const bookingValidationSchema = z.object({
     formData: formDataSchema,
     checkIn: z.string(),
     checkOut: z.string(),
-    bookingStatus: z.enum(['pending', 'Booked', 'cancelled']).optional(),
+    bookingStatus: z.enum([ 'Booked', 'cancelled','completed' ]).optional(),
     paymentStatus: z.enum(['pending', 'paid']).optional(),
   }),
 });
