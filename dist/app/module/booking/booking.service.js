@@ -64,7 +64,7 @@ const createBookingInDb = (bookingData) => __awaiter(void 0, void 0, void 0, fun
         }
         // If booking creation is successful, send an email
         const bookingConfirmationHtml = `<p>Your booking for ${room.title} is pending.</p><p>Total Price: ${totalWithTax}</p>`;
-        yield (0, sendEmail_1.sendEmail)(bookingData.userEmail, 'Booking Pending', bookingConfirmationHtml);
+        yield (0, sendEmail_1.sendEmail)(bookingData.userEmail, 'You have booked', bookingConfirmationHtml);
         yield session.commitTransaction();
         session.endSession();
         return result;
@@ -91,15 +91,29 @@ const getBookingByEmail = (email, language) => __awaiter(void 0, void 0, void 0,
         // Cast the result of populate to TBookingsRoom
         const bookings = yield booking_model_1.default.find({ userEmail: email })
             .populate('roomId')
+            .sort({ createdAt: -1 })
             .lean();
         if (!bookings || bookings.length === 0) {
             throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No bookings found for this email');
         }
+        for (const booking of bookings) {
+            if (new Date(booking.checkOut).getTime() < Date.now() && booking.bookingStatus !== 'completed') {
+                booking.bookingStatus = 'completed';
+                // Update the booking in the database
+                yield booking_model_1.default.updateOne({ _id: booking._id }, { $set: { bookingStatus: 'completed' } });
+                // Note: If working within a session or transaction, make sure to pass those as options to the updateOne call
+            }
+        }
         const localizedBookings = bookings.map(booking => {
             const localizedRoom = booking.roomId ? {
+                id: booking.roomId._id,
                 title: booking.roomId.title[language],
                 size: booking.roomId.size[language],
                 images: booking.roomId.images,
+                subTitle: booking.roomId.subTitle ? {
+                    roomOne: booking.roomId.subTitle.roomOne[language],
+                    roomTwo: booking.roomId.subTitle.roomTwo && booking.roomId.subTitle.roomTwo[language],
+                } : undefined,
                 // ... localize other fields as needed
             } : null;
             return Object.assign(Object.assign({}, booking), { roomId: localizedRoom });
@@ -107,7 +121,6 @@ const getBookingByEmail = (email, language) => __awaiter(void 0, void 0, void 0,
         return localizedBookings;
     }
     catch (error) {
-        console.error('Error in getBookingByEmail:', error);
         throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
     }
 });

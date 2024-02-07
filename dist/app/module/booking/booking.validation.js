@@ -19,7 +19,7 @@ exports.bookingValidationSchema = zod_1.z.object({
         formData: formDataSchema,
         checkIn: zod_1.z.string(),
         checkOut: zod_1.z.string(),
-        bookingStatus: zod_1.z.enum(['pending', 'Booked', 'cancelled']).optional(),
+        bookingStatus: zod_1.z.enum(['Booked', 'cancelled', 'completed']).optional(),
         paymentStatus: zod_1.z.enum(['pending', 'paid']).optional(),
     }),
 });

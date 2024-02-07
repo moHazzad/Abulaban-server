@@ -114,6 +114,7 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
 
     const localizedBookings = bookings.map(booking => {
       const localizedRoom = booking.roomId ? {
+        id: booking.roomId._id,
         title: booking.roomId.title[language],
         size: booking.roomId.size[language],
         images: booking.roomId.images,
