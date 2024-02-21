@@ -52,8 +52,19 @@ userSchema.pre('save', async function (next) {
 
   if (this.isModified('email')) {
     const existingUser = await UserModel.findOne({ email: this.email });
+    // If an existing user is found with the same email
     if (existingUser) {
-      return next(new Error(`a user with '${this.email}' already exists`));
+      // If the found user is marked as deleted
+      if (existingUser.isDeleted) {
+        return next(new Error('This email is associated with a deleted account. Please contact admin for account recovery.'));
+      } else {
+        // If attempting to save the same user (e.g., during update operations), allow it
+        if (existingUser._id.equals(this._id)) {
+          return next();
+        }
+        // An active user with this email already exists
+        return next(new Error('An account with this email already exists.'));
+      }
     }
   }
 

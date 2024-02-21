@@ -94,7 +94,7 @@ const login = async (loginData: TLogin) => {
   const { email, password } = loginData;
   const user = await UserModel.findOne({ email }).select('+password');
 
-  if (!user || user.isDeleted) {
+  if (!user || user.isDeleted) { 
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid credentials');
   }
 
@@ -122,6 +122,7 @@ const login = async (loginData: TLogin) => {
     fullName: `${user.firstName} ${user.lastName}`,
     phone: user.phone,
     email: user.email,
+    role: user.role
   };
 
   return { accessToken, refreshToken, user: userInfo };

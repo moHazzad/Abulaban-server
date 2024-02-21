@@ -13,6 +13,18 @@ const createUserInDb = async (userData: TUser) => {
   try {
     // const user = new UserModel(userData)
     // const result = await user.save()
+    // Check if a user with the same email already exists
+    const existingUser = await UserModel.findOne({ email: userData.email });
+    console.log(existingUser,'aksdjjas');
+
+    if (existingUser) {
+      if (existingUser.isDeleted=== true) {
+        throw new Error('This email is associated with a deleted account. Please contact admin for account recovery.');
+      } else {
+        throw new Error('An account with this email already exists.');
+      }
+    }
+
     const user = await UserModel.create([userData], { session });
 
     if (!user) {
@@ -31,7 +43,10 @@ const createUserInDb = async (userData: TUser) => {
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err);
+  }finally {
+    session.endSession();
   }
+
 };
 
 // //  retrieve all user with specific field
@@ -47,6 +62,8 @@ const getAllUserUserFromDb = async () => {
         username: 1,
         fullName: 1,
         email: 1,
+        role: 1,
+        isActive: 1,
       },
     },
   ]);
@@ -103,7 +120,7 @@ const deleteUser = async (userId: string) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error('Failed to delete student');
+    throw new Error('Failed to delete user');
   }
 };
 

@@ -42,7 +42,7 @@ const getAllBookingRooms = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSingleBookedRoom = catchAsync(async (req: Request, res: Response) => {
-  // console.log(req.body);
+  console.log(req.params.userEmail,'asdjhh');
   const userEmail = req.params.userEmail;
   // const currentLanguage = req.headers['accept-language'];
   //  console.log(req.user);

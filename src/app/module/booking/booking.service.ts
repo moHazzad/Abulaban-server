@@ -95,10 +95,11 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
   try {
     // Cast the result of populate to TBookingsRoom
     const bookings = await BookingModel.find({ userEmail: email })
-      .populate<{ roomId: TPopulatedRoom }>('roomId')
-      .sort({ createdAt: -1 }) 
-      .lean();
-      
+    .populate<{ roomId: TPopulatedRoom }>('roomId')
+    .sort({ createdAt: -1 }) 
+    .lean();
+    
+    
     if (!bookings || bookings.length === 0) {
       throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
     }
@@ -134,8 +135,12 @@ const getBookingByEmail = async (email: string, language: LanguageKey) => {
 
     return localizedBookings;
   } catch (error) {
+    if (error instanceof AppError) {
+      // Rethrow the error if it's an AppError
+      throw error;
+    }
     
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Unexpected error in getBookingByEmail');
   }
 };
 
