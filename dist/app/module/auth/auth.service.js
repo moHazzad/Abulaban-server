@@ -105,6 +105,7 @@ const login = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
         fullName: `${user.firstName} ${user.lastName}`,
         phone: user.phone,
         email: user.email,
+        role: user.role
     };
     return { accessToken, refreshToken, user: userInfo };
 });

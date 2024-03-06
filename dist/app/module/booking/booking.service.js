@@ -121,7 +121,11 @@ const getBookingByEmail = (email, language) => __awaiter(void 0, void 0, void 0,
         return localizedBookings;
     }
     catch (error) {
-        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Error in getBookingByEmail:');
+        if (error instanceof AppError_1.default) {
+            // Rethrow the error if it's an AppError
+            throw error;
+        }
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Unexpected error in getBookingByEmail');
     }
 });
 // const getBookingByEmail = async (email: string, language: LanguageKey) => {

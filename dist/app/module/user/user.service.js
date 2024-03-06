@@ -36,6 +36,17 @@ const createUserInDb = (userData) => __awaiter(void 0, void 0, void 0, function*
     try {
         // const user = new UserModel(userData)
         // const result = await user.save()
+        // Check if a user with the same email already exists
+        const existingUser = yield user_model_1.UserModel.findOne({ email: userData.email });
+        console.log(existingUser, 'aksdjjas');
+        if (existingUser) {
+            if (existingUser.isDeleted === true) {
+                throw new Error('This email is associated with a deleted account. Please contact admin for account recovery.');
+            }
+            else {
+                throw new Error('An account with this email already exists.');
+            }
+        }
         const user = yield user_model_1.UserModel.create([userData], { session });
         if (!user) {
             throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to create user');
@@ -53,6 +64,9 @@ const createUserInDb = (userData) => __awaiter(void 0, void 0, void 0, function*
         yield session.endSession();
         throw new Error(err);
     }
+    finally {
+        session.endSession();
+    }
 });
 // //  retrieve all user with specific field
 const getAllUserUserFromDb = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -67,6 +81,8 @@ const getAllUserUserFromDb = () => __awaiter(void 0, void 0, void 0, function* (
                 username: 1,
                 fullName: 1,
                 email: 1,
+                role: 1,
+                isActive: 1,
             },
         },
     ]);
@@ -102,7 +118,7 @@ const deleteUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     catch (err) {
         yield session.abortTransaction();
         yield session.endSession();
-        throw new Error('Failed to delete student');
+        throw new Error('Failed to delete user');
     }
 });
 // // order

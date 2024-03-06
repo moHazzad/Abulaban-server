@@ -53,7 +53,7 @@ const getAllBookingRooms = (0, catchAsync_1.default)((req, res) => __awaiter(voi
     }
 }));
 const getSingleBookedRoom = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log(req.body);
+    console.log(req.params.userEmail, 'asdjhh');
     const userEmail = req.params.userEmail;
     // const currentLanguage = req.headers['accept-language'];
     //  console.log(req.user);
