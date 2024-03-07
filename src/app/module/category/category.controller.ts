@@ -29,6 +29,7 @@ const createCategory = catchAsync(async(req: Request, res: Response) =>{
     }    
 
 })
+
 const getCategoryController = catchAsync(async(req: Request, res: Response) =>{
     
     const languageParam = req.query.lang;
