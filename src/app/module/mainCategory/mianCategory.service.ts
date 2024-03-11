@@ -4,7 +4,8 @@ import { TMainCategory } from './mainCategory.interface';
 import { MainCategoryModel } from './mainCategory.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
-import { LanguageKey } from '../room/room.interface';
+import { LanguageKey } from '../../utils/Common.interface';
+// import { LanguageKey } from '../room/room.interface';
 
 const validateCategoryData = (data: TMainCategory) => {
   // Validate that both 'en' and 'ar' fields are present and not empty

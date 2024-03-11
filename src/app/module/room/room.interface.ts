@@ -11,7 +11,7 @@ export type RoomQuery = {
 export type SortOrder = 'asc' | 'desc';
 // export type MaxGuestsType = number | null;
 
-export type LanguageKey = 'en' | 'ar';
+// export type LanguageKey = 'en' | 'ar';
 
 export type LocalizedString = {
   en: string;

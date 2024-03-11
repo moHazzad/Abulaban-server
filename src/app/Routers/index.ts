@@ -5,9 +5,10 @@ import { UserRoute } from '../module/user/user.route';
 import { authRoutes } from '../module/auth/auth.route';
 import { RoomRoute } from '../module/room/room.route';
 import { bookingRoute } from '../module/booking/booking.route';
-import { CategoryRoute } from '../module/category/category.route';
+// import { CategoryRoute } from '../module/category/category.route';
 import { RoomReviewRoute } from '../module/review/review.route';
 import { MainCategoryRoute } from '../module/mainCategory/mainCategory.route';
+import { SubCategoryRoute } from '../module/sub-category/subCategory.route';
 
 
 
@@ -33,8 +34,8 @@ const moduleRoutes = [
       route: MainCategoryRoute,
     },
     {
-      path: '/category',
-      route: CategoryRoute,
+      path: '/sub-category',
+      route: SubCategoryRoute,
     },
     {
       path: '/booking',
