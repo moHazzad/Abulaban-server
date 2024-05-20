@@ -18,7 +18,7 @@ export type LocalizedString = {
     Name: any;
     id: string;
     categoryTitle: string;
-    ParentCategory: TMainCategory  // Use your main category type here
+    ParentCategory: TMainCategory | null;  // Use your main category type here
     // Other fields of subcategory...
 };
 //   export type TRoomCategory = {

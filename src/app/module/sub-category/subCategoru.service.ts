@@ -9,44 +9,77 @@ import { PopulatedSubCategory } from '../mainCategory/mainCategory.interface';
 // import { LanguageKey } from '../room/room.interface';
 // import { Types } from "mongoose";
 
+// const createSubCategoryDb = async (categoryData: TSubCategory) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const subCategory = await SubCategoryModel.create([categoryData], {
+//       session,
+//     });
+
+//     if (!subCategory) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create category');
+//     }
+
+//     await session.commitTransaction();
+
+//     return subCategory;
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   } catch (err: any) {
+//     await session.abortTransaction();
+
+//     if (err instanceof AppError) {
+//       throw err;
+//     }
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'Failed to create category due to an unexpected error.',
+//     );
+//   } finally {
+//     await session.endSession();
+//   }
+// };
+
 const createSubCategoryDb = async (categoryData: TSubCategory) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const subCategory = await SubCategoryModel.create([categoryData], {
-      session,
-    });
+    const subCategory = await SubCategoryModel.create([categoryData], { session });
 
     if (!subCategory) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create category');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create category: No document returned.');
     }
 
     await session.commitTransaction();
-
     return subCategory;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
+
+    let errorMessage = 'Failed to create category due to an unexpected error.';
+    if (err instanceof mongoose.Error.ValidationError) {
+      errorMessage = `Validation error: ${err.message}`;
+    } else if (err instanceof mongoose.Error) {
+      errorMessage = `Database error: ${err.message}`;
+    } else if (err.code && err.code === 11000) {
+      errorMessage = 'Database error: Duplicate key error, such an item already exists.';
+    }
 
     if (err instanceof AppError) {
       throw err;
     }
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Failed to create category due to an unexpected error.',
-    );
+
+    throw new AppError(httpStatus.BAD_REQUEST, errorMessage);
   } finally {
     await session.endSession();
   }
 };
 
 
-
 const getSubCategory = async (lang: LanguageKey): Promise<PopulatedSubCategory[]> => {
   const subCategories = await SubCategoryModel.find()
       .populate({
           path: 'ParentCategory',
-          select: 'Name' // Selecting only the Name from the main category
+           // Selecting only the Name from the main category
       })
       .lean();
 
@@ -62,7 +95,7 @@ const getSubCategory = async (lang: LanguageKey): Promise<PopulatedSubCategory[]
       id: subCategory._id.toString(),
       categoryTitle: subCategory.categoryTitle[lang],
       ParentCategory: populatedParentCategory ? populatedParentCategory.Name[lang] : null,
-      Name: undefined
+      Name: undefined 
     };
 
     return localizedSubCategory;

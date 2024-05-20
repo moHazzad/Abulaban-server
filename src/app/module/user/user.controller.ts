@@ -1,34 +1,50 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { userService } from "./user.service";
 import catchAsync from "../../utils/catchAsync";
 import AppError from "../../Error/errors/AppError";
 import httpStatus from "http-status";
 import sendResponse from "../../utils/sendResponse";
+import { UserRole } from "./user.interface";
 // import userValidationSchemaZod from "./user.validation";
 
 
-const createUser = catchAsync(async(req: Request, res: Response) =>{
+const createUserController  = catchAsync(async(req: Request, res: Response) =>{
     
     // const user = req.body
     
     //saving to db
-    const result = await userService.createUserInDb(req.body)
+    try {
+      const result = await userService.createUser(req.body, UserRole.User);
+      res.status(200).json({
+        success: true,
+        message: 'user is created successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+    }
+     
 
-    if (!result) {
-        return res
-        .status(404)
-        .json({
-            success: false,
-            message: 'user not created',
-            data: res
-        })
-    } else {
-        res.status(200).json({
-            success: true,
-            message: 'user is created successfully',
-            data: result,
-          });
-    }    
+})
+
+
+const createAdminController  = catchAsync(async(req: Request, res: Response) =>{
+    
+    // const user = req.body
+    
+    //saving to db
+    try {
+      const result = await userService.createUser(req.body, UserRole.Admin);
+      res.status(200).json({
+        success: true,
+        message: 'user is created successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+    }
+     
 
 })
 
@@ -204,8 +220,10 @@ const deleteSingleUser = catchAsync(async (req: Request, res:Response) => {
 
 // }
 
-export const createUserController = {
-    createUser,
+export const userController = {
+    // createUser,
+    createUserController ,
+    createAdminController,
     allUsers,
     singleUserById,
     updateSingleUser,

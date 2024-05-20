@@ -1,53 +1,71 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
-import { TUser } from './user.interface';
+import { User, UserRole } from './user.interface';
+import bcrypt from 'bcrypt';
 import { UserModel } from './user.model';
 import AppError from '../../Error/errors/AppError';
 // import AppError from "../../Error/errors/appError";
 
-const createUserInDb = async (userData: TUser) => {
-  
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    // const user = new UserModel(userData)
-    // const result = await user.save()
-    // Check if a user with the same email already exists
-    const existingUser = await UserModel.findOne({ email: userData.email });
-    console.log(existingUser,'aksdjjas');
 
-    if (existingUser) {
-      if (existingUser.isDeleted=== true) {
-        throw new Error('This email is associated with a deleted account. Please contact admin for account recovery.');
-      } else {
-        throw new Error('An account with this email already exists.');
-      }
-    }
+const hashPassword = async (password: string) => {
+  return await bcrypt.hash(password, 10);
+};
 
-    const user = await UserModel.create([userData], { session });
+const createUser = async (userData: User, creatorRole: UserRole) => {
+  // Hash password
+  const hashedPassword = await hashPassword(userData.passwordHash);
 
-    if (!user) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
-    }
-    await session.commitTransaction();
-    await session.endSession();
-    // Convert the Mongoose document to a plain JavaScript object
-    // const userObject = user;
-
-    // Remove the password field from the response
-    // delete userObject.password;
-
-    return user;
-  } catch (err: any) {
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error(err);
-  }finally {
-    session.endSession();
+  // Check role validity
+  if (userData.role !== UserRole.User && creatorRole !== UserRole.Admin) {
+    throw new AppError(httpStatus.FORBIDDEN, "Only admins can assign elevated roles.");
   }
 
+  const newUser = new UserModel({
+    ...userData,
+    passwordHash: hashedPassword
+  });
+
+  try {
+    const savedUser = await newUser.save();
+    return savedUser;
+  } catch (error: any) {
+    throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+  }
 };
+// const createUser  = async (userData: User) => {
+  
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+// // Hash password
+//     const hashedPassword = await bcrypt.hash(userData.passwordHash, 10);
+
+//     // Prepare new user document
+//     const userDocument = new UserModel({
+//       ...userData,
+//       passwordHash: hashedPassword
+//     });
+
+
+//     try {
+      
+//       const savedUser = await userDocument.save();
+      
+//     await session.commitTransaction();
+//     await session.endSession();
+//     return savedUser;
+       
+//   } catch (err: any) {
+//     await session.abortTransaction();
+//     await session.endSession();
+//     throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${err.message}`)
+    
+//   }finally {
+//     session.endSession();
+//   }
+
+// };
 
 // //  retrieve all user with specific field
 const getAllUserUserFromDb = async () => {
@@ -175,7 +193,8 @@ const deleteUser = async (userId: string) => {
 // }
 
 export const userService = {
-  createUserInDb,
+  // createUserInDb,
+  createUser,
   getAllUserUserFromDb,
   getSingleUserById,
   updateUserInformation,

@@ -14,6 +14,7 @@ const createSubCategoryController = catchAsync(
     // Extract category data from request body
     const categoryData = req.body;
 
+
     try {
       // Use the service to create a new subcategory
       const newSubCategory =

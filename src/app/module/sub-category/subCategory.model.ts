@@ -3,21 +3,23 @@ import httpStatus from "http-status";
 import AppError from "../../Error/errors/AppError";
 import { TSubCategory } from "./subCategory.interface";
 
-// Schema definition for localized strings
-const localizedCategoryTitleSchema = new mongoose.Schema({
-  en: { type: String, required: [true, 'English category title is required'] },
-  ar: { type: String, required: [true, 'Arabic category title is required'] }
-},{ _id: false });
 
 // SubCategory schema definition
 const subCategorySchema = new Schema<TSubCategory>({
-    categoryTitle: localizedCategoryTitleSchema,
+    categoryTitle: {
+      en: { type: String, required: [true, 'English category title is required'] },
+      ar: { type: String, required: [true, 'Arabic category title is required'] }
+    },
+    image: {
+      type: String,
+      match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif)(\?.*)?$/, 'Please fill a valid image URL.']
+    },    
     ParentCategory: { 
       type: Schema.Types.ObjectId, 
       ref: 'mainCategory', // Replace 'MainCategory' with your main category model name if different
       required: true 
     }
-  });
+  },{timestamps:true});
 
 // Pre-save middleware to check for duplicate category titles in English
 subCategorySchema.pre('save', async function(next) {
