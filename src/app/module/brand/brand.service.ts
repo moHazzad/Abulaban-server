@@ -5,21 +5,21 @@ import httpStatus from 'http-status';
 import { BrandModel } from './brand.model';
 import { Language } from './brand.controller';
 
-const createBrandService = async (brandData: TBrand) => {
+const createBrandService = async (brandData: TBrand) => { 
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const mainCategory = await BrandModel.create([brandData], {
+    const result = await BrandModel.create([brandData], {
       session,
     });
 
-    if (!mainCategory) {
+    if (!result) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Brand');
     }
 
     await session.commitTransaction();
 
-    return mainCategory;
+    return result;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();

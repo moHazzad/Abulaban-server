@@ -7,7 +7,7 @@ import { Router } from 'express';
 // import { bookingRoute } from '../module/booking/booking.route';
 // // import { CategoryRoute } from '../module/category/category.route';
 // import { RoomReviewRoute } from '../module/review/review.route';
-// import { productRoute } from '../Products/products.route';
+import { productRoute } from '../Products/products.route';
 import { SubCategoryRoute } from '../module/sub-category/subCategory.route';
 import { MainCategoryRoute } from '../module/mainCategory/mainCategory.route';
 import { BrandRoute } from '../module/brand/brand.route';
@@ -43,10 +43,10 @@ const moduleRoutes = [
       path: '/brand',
       route: BrandRoute,
     },
-    // {
-    //   path: '/product',
-    //   route: productRoute,
-    // },
+    {
+      path: '/product',
+      route: productRoute,
+    },
     // {
     //   path: '/booking',
     //   route: bookingRoute,
