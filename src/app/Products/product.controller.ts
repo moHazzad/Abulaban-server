@@ -67,6 +67,21 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
     }
   };
 
+   const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
+    const { brandId } = req.params;
+    const lang = req.query.lang as Language;
+  
+    try {
+      const products = await productService.getProductByBrandId(brandId, lang);
+      res.status(httpStatus.OK).json({
+        success: true,
+        data: products,
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
 //   const getProductController = catchAsync(async (req: Request, res: Response, next: NextFunction ) => {
 //     // Extract language preference from request query or default to 'en'
 //     const lang = req.query.lang as LanguageKey || 'en';
@@ -170,7 +185,8 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
   export const productController = {
     getProducts,
     createProductController,
-    getProductHandler
+    getProductHandler,
+    getProductsByBrandIdController
     // getProductController,
     // singleProductController,
     // updateProductController,

@@ -44,7 +44,7 @@ const moduleRoutes = [
       route: BrandRoute,
     },
     {
-      path: '/product',
+      path: '/products',
       route: productRoute,
     },
     // {

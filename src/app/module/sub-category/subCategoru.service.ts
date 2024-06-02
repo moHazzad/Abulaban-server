@@ -94,6 +94,7 @@ const getSubCategory = async (lang: LanguageKey): Promise<PopulatedSubCategory[]
     const localizedSubCategory: PopulatedSubCategory = {
       id: subCategory._id.toString(),
       categoryTitle: subCategory.categoryTitle[lang],
+      image: subCategory.image,
       ParentCategory: populatedParentCategory ? populatedParentCategory.Name[lang] : null,
       Name: undefined 
     };
