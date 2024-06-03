@@ -11,7 +11,7 @@ const app = express()
 // parser
 
 app.use(cors({
-  origin:  ['https://mutlilangualawalive.vercel.app', 'http://127.0.0.1:5173'],  // Update this to your frontend's URL
+  origin:  [ 'http://localhost:3000'],  // Update this to your frontend's URL
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   allowedHeaders: 'Content-Type,Authorization'
