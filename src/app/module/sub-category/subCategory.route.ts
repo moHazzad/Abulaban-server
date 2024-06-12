@@ -10,7 +10,7 @@ const router = express.Router()
 
 router.get('/', SubCategoryController.getSubCategoryController )
 router.post('/create',  validateRequest(TSubCategorySchema), SubCategoryController.createSubCategoryController )
-router.put('/:categoryId', SubCategoryController.editSubCategoryController);
-router.delete('/:categoryId', SubCategoryController.deleteSubCategoryController )
+// router.put('/:categoryId', SubCategoryController.editSubCategoryController);
+// router.delete('/:categoryId', SubCategoryController.deleteSubCategoryController )
 
 export const SubCategoryRoute = router

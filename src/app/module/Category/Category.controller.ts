@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
-import { mainCategoryService } from './mianCategory.service';
+import { categoryService } from './Category.service';
 import httpStatus from 'http-status';
 import sendResponse from '../../utils/sendResponse';
 import AppError from '../../Error/errors/AppError';
 
-const createMainCategory = catchAsync(async (req: Request, res: Response) => {
+// create category 
+const createCategoryController = catchAsync(async (req: Request, res: Response) => {
   // console.log(req.body);
   //saving to db
-  const result = await mainCategoryService.createMainCategoryDb(req.body);
+  const result = await categoryService.createCategoryDb(req.body);
 
   if (!result) {
     return res.status(404).json({
@@ -26,8 +27,7 @@ const createMainCategory = catchAsync(async (req: Request, res: Response) => {
 });
 
 // get categories
-
-const getMainCategoryController = catchAsync(
+const getCategoriesController = catchAsync(
   async (req: Request, res: Response) => {
     const languageParam = req.query.lang;
     const language =
@@ -35,7 +35,7 @@ const getMainCategoryController = catchAsync(
       (languageParam === 'en' || languageParam === 'ar')
         ? languageParam
         : 'en';
-    const result = await mainCategoryService.getCategoryFromDb(language);
+    const result = await categoryService.getCategoryFromDb(language);
 
     if (!result) {
       throw new AppError(httpStatus.NOT_FOUND, 'No category found.');
@@ -56,7 +56,7 @@ const getMainCategoryController = catchAsync(
 
     try {
         // Use the service to update the category
-        const updatedCategory = await mainCategoryService.editCategoryInDb(categoryId, updateData);
+        const updatedCategory = await categoryService.editCategoryInDb(categoryId, updateData);
 
         // Send back a success response
         res.status(httpStatus.OK).json({
@@ -80,7 +80,7 @@ const getMainCategoryController = catchAsync(
 
     try {
         // Use the service to delete the category
-        const deletedCategory = await mainCategoryService.deleteCategoryFromDb(categoryId);
+        const deletedCategory = await categoryService.deleteCategoryFromDb(categoryId);
 
         // Send back a success response
         res.status(httpStatus.OK).json({
@@ -100,10 +100,10 @@ const getMainCategoryController = catchAsync(
 
 
 
-export const createMainCategoryController = {
-  createMainCategory,
-  getMainCategoryController,
+export const categoryController = {
+  createCategoryController,
+  getCategoriesController,
+  editCategoryController,
   deleteCategoryController,
-  editCategoryController
   // getCategoryController
 };

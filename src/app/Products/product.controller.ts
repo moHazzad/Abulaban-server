@@ -11,23 +11,23 @@ export type Language = 'en' | 'ar';
 
 // get all products 
 
-const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+// const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   
-  let { lang} = req.query;
+//   let { lang} = req.query;
 
 
-  // Set default language to 'ar' if not provided or invalid
-if (lang !== 'en' && lang !== 'ar') {
-  lang = 'ar';
-}
+//   // Set default language to 'ar' if not provided or invalid
+// if (lang !== 'en' && lang !== 'ar') {
+//   lang = 'ar';
+// }
 
-  try {
-    const products = await productService.getProductsByLanguage( lang as Language );
-    return res.status(200).json({ success: true, data: products });
-  } catch (error) {
-    next(error)
-  }
-};
+//   try {
+//     const products = await productService.getProductsByLanguage( lang as Language );
+//     return res.status(200).json({ success: true, data: products });
+//   } catch (error) {
+//     next(error)
+//   }
+// };
 
 const createProductController = catchAsync( async (req: Request, res: Response, next: NextFunction ) => {
       // Extract category data from request body
@@ -49,38 +49,38 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
     },
   );
 
-  const getProductHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const { productId } = req.params;
-    let { lang} = req.query;
+  // const getProductHandler = async (req: Request, res: Response, next: NextFunction) => {
+  //   const { productId } = req.params;
+  //   let { lang} = req.query;
 
 
-    // Set default language to 'ar' if not provided or invalid
-  if (lang !== 'en' && lang !== 'ar') {
-    lang = 'ar';
-  }
+  //   // Set default language to 'ar' if not provided or invalid
+  // if (lang !== 'en' && lang !== 'ar') {
+  //   lang = 'ar';
+  // }
   
-    try {
-      const product = await productService.getProductById(productId, lang as Language );
-      return res.status(200).json({ success: true, data: product });
-    } catch (error) {
-      next(error)
-    }
-  };
+  //   try {
+  //     const product = await productService.getProductById(productId, lang as Language );
+  //     return res.status(200).json({ success: true, data: product });
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // };
 
-   const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
-    const { brandId } = req.params;
-    const lang = req.query.lang as Language;
+  //  const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
+  //   const { brandId } = req.params;
+  //   const lang = req.query.lang as Language;
   
-    try {
-      const products = await productService.getProductByBrandId(brandId, lang);
-      res.status(httpStatus.OK).json({
-        success: true,
-        data: products,
-      });
-    } catch (error: any) {
-      next(error);
-    }
-  };
+  //   try {
+  //     const products = await productService.getProductByBrandId(brandId, lang);
+  //     res.status(httpStatus.OK).json({
+  //       success: true,
+  //       data: products,
+  //     });
+  //   } catch (error: any) {
+  //     next(error);
+  //   }
+  // };
 
 //   const getProductController = catchAsync(async (req: Request, res: Response, next: NextFunction ) => {
 //     // Extract language preference from request query or default to 'en'
@@ -183,10 +183,10 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
 // };
 
   export const productController = {
-    getProducts,
+    // getProducts,
     createProductController,
-    getProductHandler,
-    getProductsByBrandIdController
+    // getProductHandler,
+    // getProductsByBrandIdController
     // getProductController,
     // singleProductController,
     // updateProductController,

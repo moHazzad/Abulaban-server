@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { TMainCategory } from './mainCategory.interface';
-import { MainCategoryModel } from './mainCategory.model';
+// import { TMainCategory } from './Category.interface';
+// import { MainCategoryModel } from './Category.model';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
 import { LanguageKey } from '../../utils/Common.interface';
+import { TCategory } from './Category.interface';
+import { CategoryModel } from './Category.model';
 // import { LanguageKey } from '../room/room.interface';
 
-const validateCategoryData = (data: TMainCategory) => {
+const validateCategoryData = (data: TCategory) => {
   // Validate that both 'en' and 'ar' fields are present and not empty
   if (!data.Name.en || !data.Name.ar) {
     throw new AppError(
@@ -23,21 +25,22 @@ const validateCategoryData = (data: TMainCategory) => {
   }
 };
 
-const createMainCategoryDb = async (categoryData: TMainCategory) => {
+// create category 
+const createCategoryDb = async (categoryData: TCategory) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const mainCategory = await MainCategoryModel.create([categoryData], {
+    const Category = await CategoryModel.create([categoryData], {
       session,
     });
 
-    if (!mainCategory) {
+    if (!Category) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create category');
     }
 
     await session.commitTransaction();
 
-    return mainCategory;
+    return Category;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
@@ -58,7 +61,7 @@ const createMainCategoryDb = async (categoryData: TMainCategory) => {
  * Get a main category by ID.
  */
 const getCategoryFromDb = async (lang: LanguageKey) => {
-  const categories = await MainCategoryModel.find().lean();
+  const categories = await CategoryModel.find().lean();
   if (!categories.length) {
     throw new AppError(httpStatus.NOT_FOUND, 'No categories found');
   }
@@ -78,7 +81,7 @@ const getCategoryFromDb = async (lang: LanguageKey) => {
  */
 const editCategoryInDb = async (
   categoryId: string,
-  updateData: TMainCategory,
+  updateData: TCategory,
 ) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -86,7 +89,7 @@ const editCategoryInDb = async (
     // Validate the update data before proceeding
     validateCategoryData(updateData);
 
-    const updatedCategory = await MainCategoryModel.findByIdAndUpdate(
+    const updatedCategory = await CategoryModel.findByIdAndUpdate(
       categoryId,
       { $set: updateData }, // Use $set to update fields explicitly
       { new: true, session, runValidators: true },
@@ -114,7 +117,7 @@ const deleteCategoryFromDb = async (categoryId: string) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const deletedCategory = await MainCategoryModel.findByIdAndDelete(
+    const deletedCategory = await CategoryModel.findByIdAndDelete(
       categoryId,
       { session },
     );
@@ -134,10 +137,9 @@ const deleteCategoryFromDb = async (categoryId: string) => {
   }
 };
 
-export const mainCategoryService = {
-  createMainCategoryDb,
+export const categoryService = {
+  createCategoryDb,
   getCategoryFromDb,
   editCategoryInDb,
   deleteCategoryFromDb,
-  // getCategoryFromDb,
 };

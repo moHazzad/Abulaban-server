@@ -16,6 +16,7 @@ const localizedBrandSchema = new mongoose.Schema(
 const brandSchema = new Schema<TBrand>(
   {
     Name: localizedBrandSchema,
+    image: String ,
   },
   {
     timestamps: true, // This adds createdAt and updatedAt fields automatically

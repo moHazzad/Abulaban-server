@@ -9,8 +9,9 @@ import { Router } from 'express';
 // import { RoomReviewRoute } from '../module/review/review.route';
 import { productRoute } from '../Products/products.route';
 import { SubCategoryRoute } from '../module/sub-category/subCategory.route';
-import { MainCategoryRoute } from '../module/mainCategory/mainCategory.route';
+// import { MainCategoryRoute } from '../module/Category/Category.route';
 import { BrandRoute } from '../module/brand/brand.route';
+import { categoryRoute } from '../module/Category/Category.route';
 
 
 
@@ -33,7 +34,7 @@ const moduleRoutes = [
     // },
     {
       path: '/category',
-      route: MainCategoryRoute,
+      route: categoryRoute
     },
     {
       path: '/sub-category',

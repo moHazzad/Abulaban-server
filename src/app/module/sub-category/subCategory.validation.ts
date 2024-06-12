@@ -10,9 +10,9 @@ const localizedStringSchema = z.object({
 // Zod schema for TSubCategory
 const TSubCategorySchema = z.object({
   body: z.object({
-    categoryTitle: localizedStringSchema,
+    Name: localizedStringSchema,
     image: z.string().url('Must be a valid URL'),
-    ParentCategory: z.union([
+    CategoryId: z.union([
       z.instanceof(mongoose.Types.ObjectId, { message: "Must be a valid MongoDB ObjectId" }),
       z.string().regex(/^[0-9a-fA-F]{24}$/, 'ParentCategory must be a valid MongoDB ObjectId')
     ])

@@ -8,6 +8,7 @@ const localizedBrandValidationSchema = z.object({
 const brandValidationSchema = z.object({
   body: z.object({
     Name: localizedBrandValidationSchema,
+    image: z.string().optional(),
   }),
 });
 

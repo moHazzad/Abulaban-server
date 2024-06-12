@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import mongoose from 'mongoose';
 import mongoose from 'mongoose';
-import { Product } from './product.interface';
+import { CreateProductInput, Product } from './product.interface';
 // import AppError from '../Error/errors/AppError';
 // import httpStatus from 'http-status';
 import { ProductModel } from './products.model';
@@ -12,9 +12,9 @@ import { ProductModel } from './products.model';
 // import { ZodError } from 'zod';
 import AppError from '../Error/errors/AppError';
 import httpStatus from 'http-status';
-import { TBrand } from '../module/brand/brand.interface';
-import { TSubCategory } from '../module/sub-category/subCategory.interface';
-import { Language } from './product.controller';
+// import { TBrand } from '../module/brand/brand.interface';
+// import { TSubCategory } from '../module/sub-category/subCategory.interface';
+// import { Language } from './product.controller';
 // import handlerZodError from '../Error/errors/handlerZodError';
 
 // This is your type guard function
@@ -67,162 +67,163 @@ import { Language } from './product.controller';
 // };
 
 // get all products 
-const getProductsByLanguage = async (lang: Language) => {
-  try {
-    const products = await ProductModel.find()
-      .populate({
-        path: 'Brand',
-        select: `Name.${lang} Name.ar`,
-      })
-      .populate({
-        path: 'CategoryId',
-        select: `categoryTitle.${lang} categoryTitle.ar`,
-      })
-      .lean();
+// const getProductsByLanguage = async (lang: Language) => {
+//   try {
+//     const products = await ProductModel.find()
+//       .populate({
+//         path: 'Brand',
+//         select: `Name.${lang} Name.ar`,
+//       })
+//       .populate({
+//         path: 'CategoryId',
+//         select: `categoryTitle.${lang} categoryTitle.ar`,
+//       })
+//       .lean();
 
-    if (!products || products.length === 0) {
-      throw new AppError(httpStatus.NOT_FOUND, 'No products found');
-    }
+//     if (!products || products.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+//     }
 
-    const localizedProducts = products.map((product) => {
-      const brand = product.Brand as TBrand;
-      const category = product.CategoryId as unknown as TSubCategory;
+//     const localizedProducts = products.map((product) => {
+//       const brand = product.Brand as TBrand;
+//       const category = product.CategoryId as unknown as TSubCategory;
 
-      return {
-        ...product,
-        Name: product.Name[lang],
-        Desc: product.Desc[lang],
-        Brand: {
-          ...brand,
-          Name: brand.Name[lang],
-        },
-        CategoryId: {
-          ...category,
-          categoryTitle: category.categoryTitle[lang],
-        },
-      };
-    });
+//       return {
+//         ...product,
+//         Name: product.Name[lang],
+//         Desc: product.Desc[lang],
+//         Brand: {
+//           ...brand,
+//           Name: brand.Name[lang],
+//         },
+//         CategoryId: {
+//           ...category,
+//           categoryTitle: category.categoryTitle[lang],
+//         },
+//       };
+//     });
 
-    return localizedProducts;
-  } catch (error: any) {
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
-  }
-};
+//     return localizedProducts;
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+//   }
+// };
 
 
-const createProduct = async (productData: Partial<Product>) => {
+const createProduct = async (productData: CreateProductInput): Promise<Product> => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
+
+    // Create new product
     const newProduct = new ProductModel(productData);
     await newProduct.save({ session });
 
     if (!newProduct) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create Brand');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create product');
     }
+
+    // Commit the transaction
     await session.commitTransaction();
     return newProduct;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
-
-
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to create product: ${err.message}`);
-
   } finally {
     await session.endSession();
   }
+
 };
 
 
 
 // get  products by id 
-const getProductById = async (productId: string, lang: Language) => {
+// const getProductById = async (productId: string, lang: Language) => {
  
-  try {
-    const product = await ProductModel.findById(productId)
-      .populate({
-        path: 'Brand',
-        select: `Name.${lang} Name.ar`,
-      })
-      .populate({
-        path: 'CategoryId',
-        select: `categoryTitle.${lang} categoryTitle.ar`,
-      })
-      .lean();
+//   try {
+//     const product = await ProductModel.findById(productId)
+//       .populate({
+//         path: 'Brand',
+//         select: `Name.${lang} Name.ar`,
+//       })
+//       .populate({
+//         path: 'CategoryId',
+//         select: `categoryTitle.${lang} categoryTitle.ar`,
+//       })
+//       .lean();
 
-    if (!product) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
-    }
+//     if (!product) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
+//     }
 
-    const brand = product.Brand as TBrand;
-    const category = product.CategoryId as unknown as TSubCategory;
+//     const brand = product.Brand as TBrand;
+//     const category = product.CategoryId as unknown as TSubCategory;
 
-    // Extract and return the localized fields based on the requested language
-    const localizedProduct = {
-      ...product,
-      Name: product.Name[lang],
-      Desc: product.Desc[lang],
-      Brand: {
-        ...brand,
-        Name: brand.Name[lang],
-      },
-      CategoryId: {
-        ...category,
-        categoryTitle: category.categoryTitle[lang],
-      },
-    };
+//     // Extract and return the localized fields based on the requested language
+//     const localizedProduct = {
+//       ...product,
+//       Name: product.Name[lang],
+//       Desc: product.Desc[lang],
+//       Brand: {
+//         ...brand,
+//         Name: brand.Name[lang],
+//       },
+//       CategoryId: {
+//         ...category,
+//         categoryTitle: category.categoryTitle[lang],
+//       },
+//     };
 
-    return localizedProduct;
-  } catch (error: any) {
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get product: ${error.message}`);
-  }
-};
+//     return localizedProduct;
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get product: ${error.message}`);
+//   }
+// };
 
 // get products by brand id 
-const getProductByBrandId = async (brandId: string, lang: Language) => {
-  try {
-    const products = await ProductModel.find({ Brand: brandId })
-      .populate({
-        path: 'Brand',
-        select: `Name.${lang} Name.ar`,
-      })
-      .populate({
-        path: 'CategoryId',
-        select: `categoryTitle.${lang} categoryTitle.ar`,
-      })
-      .lean();
+// const getProductByBrandId = async (brandId: string, lang: Language) => {
+//   try {
+//     const products = await ProductModel.find({ Brand: brandId })
+//       .populate({
+//         path: 'Brand',
+//         select: `Name.${lang} Name.ar`,
+//       })
+//       .populate({
+//         path: 'CategoryId',
+//         select: `categoryTitle.${lang} categoryTitle.ar`,
+//       })
+//       .lean();
 
-    if (!products || products.length === 0) {
-      throw new AppError(httpStatus.NOT_FOUND, 'No products found for this brand');
-    }
+//     if (!products || products.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No products found for this brand');
+//     }
 
-    // Extract and return the localized fields based on the requested language
-    const localizedProducts = products.map(product => {
-      const brand = product.Brand as TBrand;
-      const category = product.CategoryId as unknown as TSubCategory;
+//     // Extract and return the localized fields based on the requested language
+//     const localizedProducts = products.map(product => {
+//       const brand = product.Brand as TBrand;
+//       const category = product.CategoryId as unknown as TSubCategory;
 
-      return {
-        ...product,
-        Name: product.Name[lang],
-        Desc: product.Desc[lang],
-        Brand: {
-          ...brand,
-          Name: brand.Name[lang],
-        },
-        CategoryId: {
-          ...category,
-          categoryTitle: category.categoryTitle[lang],
-        },
-      };
-    });
+//       return {
+//         ...product,
+//         Name: product.Name[lang],
+//         Desc: product.Desc[lang],
+//         Brand: {
+//           ...brand,
+//           Name: brand.Name[lang],
+//         },
+//         CategoryId: {
+//           ...category,
+//           categoryTitle: category.categoryTitle[lang],
+//         },
+//       };
+//     });
 
-    return localizedProducts;
-  } catch (error: any) {
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
-  }
-};
+//     return localizedProducts;
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+//   }
+// };
 
 
 // const getProducts = async (  lang: string) => {
@@ -413,10 +414,10 @@ const getProductByBrandId = async (brandId: string, lang: Language) => {
 // };
 
 export const productService = {
-  getProductsByLanguage,
+  // getProductsByLanguage,
   createProduct,
-  getProductById,
-  getProductByBrandId,
+  // getProductById,
+  // getProductByBrandId,
   // getProducts,
   // getSingleProduct,
   // editProduct,

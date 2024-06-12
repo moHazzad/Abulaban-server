@@ -1,29 +1,31 @@
 import mongoose, { model, Schema } from "mongoose";
-import { TMainCategory } from "./mainCategory.interface";
+// import { TMainCategory } from "./Category.interface";
 import httpStatus from "http-status";
 import AppError from "../../Error/errors/AppError";
+import { TCategory } from "./Category.interface";
 
 
 
 
-const localizedMainCategorySchema = new mongoose.Schema({
+const localizedCategorySchema = new mongoose.Schema({
     en: { type: String,  required: [true, 'en category title is required'] },
     ar: { type: String, required: [true, 'Ar category title is required'] }
   },{
     _id: false // Prevents Mongoose from creating `_id` for localized names
 });
 
-  const mainCategorySchema = new Schema<TMainCategory>({
-    Name: localizedMainCategorySchema ,
+  const CategorySchema = new Schema<TCategory>({
+    Name: localizedCategorySchema ,
+    image: String ,
     // ParentCategory: { type: Schema.Types.ObjectId, default: null, ref: 'Category' } 
   },{
     timestamps: true // This adds createdAt and updatedAt fields automatically
 });
 
-  mainCategorySchema.pre('save', async function (next) {
+  CategorySchema.pre('save', async function (next) {
     if (this.isModified('Name')) {
       // Assuming you want to check for existing categories by English title
-      const existingCategory = await MainCategoryModel.findOne({ 'Name.en': this.Name.en });
+      const existingCategory = await CategoryModel.findOne({ 'Name.en': this.Name.en });
       if (existingCategory) {
           return next(new AppError(httpStatus.BAD_REQUEST, `A Category with '${this.Name.en}' already exists`));
       }
@@ -31,4 +33,4 @@ const localizedMainCategorySchema = new mongoose.Schema({
     next();
   });
 
-  export const MainCategoryModel = model<TMainCategory>('mainCategory', mainCategorySchema);
+  export const CategoryModel = model<TCategory>('Category', CategorySchema);

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { TCategory } from '../Category/Category.interface';
 
 export type LocalizedString = {
   en: string;
@@ -8,7 +9,7 @@ export type LocalizedString = {
 
 export type TSubCategory = {
   _id: mongoose.Types.ObjectId;
-  categoryTitle: LocalizedString;
+  Name: LocalizedString;
   image: string,
-  ParentCategory: mongoose.Types.ObjectId | string;
-};
+  CategoryId: mongoose.Types.ObjectId | TCategory ;
+}
