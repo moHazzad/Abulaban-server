@@ -58,6 +58,26 @@ const getSubCategoryController = catchAsync(async (req: Request, res: Response) 
     }
 });
 
+const getSubCategoryByCategoryIdController = catchAsync(async (req: Request, res: Response) => {
+    // Extract language preference from request query or default to 'en'
+    const lang: LanguageKey = req.query.lang as LanguageKey || 'ar';
+    const { categoryId } = req.params;
+
+    try {
+        // Use the service to get localized subcategories
+        const subCategories = await subCategoryService.getSubCategoriesByCategoryId(lang, categoryId);
+
+        // Send back a success response with the fetched subcategories
+        res.status(httpStatus.OK).json({
+            message: 'Subcategories successfully fetched',
+            data: subCategories,
+        });
+    } catch (error: any) {
+        // Send back an error response
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred', error: error.message });
+    }
+});
+
 // const deleteSubCategoryController = catchAsync(async (req: Request, res: Response) => {
 //   const { categoryId } = req.params;
 
@@ -103,6 +123,7 @@ const getSubCategoryController = catchAsync(async (req: Request, res: Response) 
 export const SubCategoryController = {
   createSubCategoryController,
   getSubCategoryController,
+  getSubCategoryByCategoryIdController
   // deleteSubCategoryController,
   // editSubCategoryController
 };

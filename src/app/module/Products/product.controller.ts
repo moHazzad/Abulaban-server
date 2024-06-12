@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
-import catchAsync from "../utils/catchAsync";
+import catchAsync from "../../utils/catchAsync";
 import httpStatus from "http-status";
 // import AppError from "../Error/errors/AppError";
 import { productService } from "./products.service";

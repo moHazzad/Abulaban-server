@@ -1,5 +1,5 @@
 import  express  from "express";
-import { validateRequest } from "../midleware/validateRequest";
+import { validateRequest } from "../../midleware/validateRequest";
 import ProductValidationSchema from "./products.validation";
 import { productController } from "./product.controller";
 

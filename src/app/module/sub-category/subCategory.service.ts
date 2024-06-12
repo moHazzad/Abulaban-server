@@ -129,6 +129,37 @@ const getSubCategories = async (lang: LanguageKey): Promise<any> => {
   });
 };
 
+// get subcategoris by category id 
+const getSubCategoriesByCategoryId = async (lang: LanguageKey, categoryId:string ): Promise<any> => {
+  // Fetch subcategories and populate CategoryId
+  const subCategories = await SubCategoryModel.find({CategoryId: categoryId})
+    .populate({
+      path: 'CategoryId',
+      select: `Name.${lang} Name.ar image`,
+    })
+    .lean();
+
+  if (!subCategories.length) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No subcategories found');
+  }
+
+  // Map over subcategories and return localized fields
+  return subCategories.map(subCategory => {
+    const populatedCategory = subCategory.CategoryId as TCategory;
+
+    return {
+      _id: subCategory._id,
+      Name: subCategory.Name[lang],
+      image: subCategory.image,
+      Category: {
+        _id: populatedCategory._id,
+        Name: populatedCategory.Name[lang],
+        image: populatedCategory.image,
+      }
+    };
+  });
+};
+
 // const deleteSubCategory = async (categoryId: string): Promise<void> => {
 //   const session = await mongoose.startSession();
 //   session.startTransaction();
@@ -195,6 +226,7 @@ const getSubCategories = async (lang: LanguageKey): Promise<any> => {
 export const subCategoryService = {
   createSubCategoryDb,
   getSubCategories,
+  getSubCategoriesByCategoryId
   // deleteSubCategory,
   // editSubCategory
 };

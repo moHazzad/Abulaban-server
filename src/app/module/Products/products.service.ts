@@ -10,7 +10,7 @@ import { ProductModel } from './products.model';
 // import handleCastError from '../Error/errors/handleCastError';
 // import handlerDuplicateError from '../Error/errors/handlerDuplicateError';
 // import { ZodError } from 'zod';
-import AppError from '../Error/errors/AppError';
+import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
 // import { TBrand } from '../module/brand/brand.interface';
 // import { TSubCategory } from '../module/sub-category/subCategory.interface';
