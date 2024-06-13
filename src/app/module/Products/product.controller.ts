@@ -1,20 +1,82 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from "express";
-import catchAsync from "../../utils/catchAsync";
-import httpStatus from "http-status";
+import { NextFunction, Request, Response } from 'express';
+import catchAsync from '../../utils/catchAsync';
+import httpStatus from 'http-status';
 // import AppError from "../Error/errors/AppError";
-import { productService } from "./products.service";
+import { productService } from './products.service';
 // import { LanguageKey } from "../utils/Common.interface";
 // import { LanguageKey } from "../utils/Common.interface";
 
 export type Language = 'en' | 'ar';
 
-// get all products 
+// get all products
 
-// const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-  
+const getProductsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let { lang } = req.query;
+
+  // Set default language to 'ar' if not provided or invalid
+  if (lang !== 'en' && lang !== 'ar') {
+    lang = 'ar';
+  }
+
+  try {
+    const products = await productService.getProductsByLanguage(
+      lang as Language,
+    );
+    return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getProductsByCategoryController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let { lang } = req.query;
+  const { categoryId } = req.params;
+
+  // Set default language to 'ar' if not provided or invalid
+  if (lang !== 'en' && lang !== 'ar') {
+    lang = 'ar';
+  }
+
+  try {
+    const products = await productService.getProductsByCategory( categoryId, lang as Language, );
+    return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createProductController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Extract category data from request body
+    const productData = req.body;
+
+    try {
+      // Use the service to create a new subcategory
+      const product = await productService.createProduct(productData);
+
+      // Send back a success response with the newly created subcategory
+      res.status(httpStatus.CREATED).json({
+        message: 'product successfully created',
+        data: product,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// const getProductHandler = async (req: Request, res: Response, next: NextFunction) => {
+//   const { productId } = req.params;
 //   let { lang} = req.query;
-
 
 //   // Set default language to 'ar' if not provided or invalid
 // if (lang !== 'en' && lang !== 'ar') {
@@ -22,65 +84,27 @@ export type Language = 'en' | 'ar';
 // }
 
 //   try {
-//     const products = await productService.getProductsByLanguage( lang as Language );
-//     return res.status(200).json({ success: true, data: products });
+//     const product = await productService.getProductById(productId, lang as Language );
+//     return res.status(200).json({ success: true, data: product });
 //   } catch (error) {
 //     next(error)
 //   }
 // };
 
-const createProductController = catchAsync( async (req: Request, res: Response, next: NextFunction ) => {
-      // Extract category data from request body
-      const productData = req.body;
-  
-      try {
-        // Use the service to create a new subcategory
-        const product = await productService.createProduct(productData);
-  
-        // Send back a success response with the newly created subcategory
-        res.status(httpStatus.CREATED).json({
-          message: 'product successfully created',
-          data: product,
-        });
-      } catch (error) {
-        
-        next(error)
-      }
-    },
-  );
+//  const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
+//   const { brandId } = req.params;
+//   const lang = req.query.lang as Language;
 
-  // const getProductHandler = async (req: Request, res: Response, next: NextFunction) => {
-  //   const { productId } = req.params;
-  //   let { lang} = req.query;
-
-
-  //   // Set default language to 'ar' if not provided or invalid
-  // if (lang !== 'en' && lang !== 'ar') {
-  //   lang = 'ar';
-  // }
-  
-  //   try {
-  //     const product = await productService.getProductById(productId, lang as Language );
-  //     return res.status(200).json({ success: true, data: product });
-  //   } catch (error) {
-  //     next(error)
-  //   }
-  // };
-
-  //  const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
-  //   const { brandId } = req.params;
-  //   const lang = req.query.lang as Language;
-  
-  //   try {
-  //     const products = await productService.getProductByBrandId(brandId, lang);
-  //     res.status(httpStatus.OK).json({
-  //       success: true,
-  //       data: products,
-  //     });
-  //   } catch (error: any) {
-  //     next(error);
-  //   }
-  // };
+//   try {
+//     const products = await productService.getProductByBrandId(brandId, lang);
+//     res.status(httpStatus.OK).json({
+//       success: true,
+//       data: products,
+//     });
+//   } catch (error: any) {
+//     next(error);
+//   }
+// };
 
 //   const getProductController = catchAsync(async (req: Request, res: Response, next: NextFunction ) => {
 //     // Extract language preference from request query or default to 'en'
@@ -90,7 +114,6 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
 //         // Use the service to get localized subcategories
 //         const subCategories = await productService.getProducts(lang);
 
-        
 //         res.status(httpStatus.OK).json({
 //             message: 'Product successfully fetched',
 //             data: subCategories,
@@ -109,7 +132,6 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
 //         // Use the service to get localized subcategories
 //         const subCategories = await productService.getSingleProduct(productId, lang);
 
-        
 //         res.status(httpStatus.OK).json({
 //             message: 'Product successfully fetched',
 //             data: subCategories,
@@ -182,13 +204,14 @@ const createProductController = catchAsync( async (req: Request, res: Response, 
 //   }
 // };
 
-  export const productController = {
-    // getProducts,
-    createProductController,
-    // getProductHandler,
-    // getProductsByBrandIdController
-    // getProductController,
-    // singleProductController,
-    // updateProductController,
-    // DeleteProductController
-  };
+export const productController = {
+  getProductsController,
+  createProductController,
+  getProductsByCategoryController
+  // getProductHandler,
+  // getProductsByBrandIdController
+  // getProductController,
+  // singleProductController,
+  // updateProductController,
+  // DeleteProductController
+};

@@ -63,7 +63,7 @@ export interface Product extends Document {
   releaseDate?: Date;
   isDeleted: boolean;
   deletedAt?: Date;
-  highlights?: LocalizedHighlights;
+  highlights: LocalizedHighlights;
   // eslint-disable-next-line no-unused-vars
   updateStock(quantity: number): Promise<void>;
 }

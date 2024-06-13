@@ -53,7 +53,7 @@ const ProductValidationSchema = z.object({
     releaseDate: z.date().optional(),
     isDeleted: z.boolean().default(false).optional(),
     deletedAt: z.date().optional(),
-    highlights: localizedHighlightsSchema.optional(),
+    highlights: localizedHighlightsSchema,
     // reviews: z.array(reviewSchema).optional(),
   }),
 });

@@ -12,6 +12,10 @@ import { ProductModel } from './products.model';
 // import { ZodError } from 'zod';
 import AppError from '../../Error/errors/AppError';
 import httpStatus from 'http-status';
+import { Language } from './product.controller';
+import { TBrand } from '../brand/brand.interface';
+import { TSubCategory } from '../sub-category/subCategory.interface';
+import { TCategory } from '../Category/Category.interface';
 // import { TBrand } from '../module/brand/brand.interface';
 // import { TSubCategory } from '../module/sub-category/subCategory.interface';
 // import { Language } from './product.controller';
@@ -66,16 +70,16 @@ import httpStatus from 'http-status';
 //   }
 // };
 
-// get all products 
+// get all products
 // const getProductsByLanguage = async (lang: Language) => {
 //   try {
-//     const products = await ProductModel.find()
+//     const products = await ProductModel.find({ isDeleted: { $ne: true } })
 //       .populate({
-//         path: 'Brand',
+//         path: 'brand',
 //         select: `Name.${lang} Name.ar`,
 //       })
 //       .populate({
-//         path: 'CategoryId',
+//         path: 'categoryId',
 //         select: `categoryTitle.${lang} categoryTitle.ar`,
 //       })
 //       .lean();
@@ -85,32 +89,157 @@ import httpStatus from 'http-status';
 //     }
 
 //     const localizedProducts = products.map((product) => {
-//       const brand = product.Brand as TBrand;
-//       const category = product.CategoryId as unknown as TSubCategory;
+//       const brand = product.brand as TBrand;
+//       const subCategory = product.subCategoryId as TSubCategory;
+//       const category = product.categoryId  as TCategory;
 
 //       return {
 //         ...product,
-//         Name: product.Name[lang],
-//         Desc: product.Desc[lang],
+//         Name: product.name[lang],
+//         Desc: product.desc[lang],
+//         type: product.type[lang],
+//         highlights: product.highlights[lang],
 //         Brand: {
 //           ...brand,
 //           Name: brand.Name[lang],
 //         },
 //         CategoryId: {
 //           ...category,
-//           categoryTitle: category.categoryTitle[lang],
+//           categoryTitle: category.Name[lang],
 //         },
 //       };
 //     });
 
 //     return localizedProducts;
 //   } catch (error: any) {
+//     console.log(error);
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
 //   }
 // };
+const getProductsByLanguage = async (lang: Language) => {
+  try {
+    const products = await ProductModel.find({ isDeleted: false })
+      .populate({
+        path: 'brand',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'categoryId',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'subCategoryId',
+        select: `Name.${lang}`,
+      })
+      .lean();
 
+    if (products.length === 0) {
+      throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+    }
 
-const createProduct = async (productData: CreateProductInput): Promise<Product> => {
+    return products.map((product) => {
+      const brand = product.brand as TBrand;
+      const subCategory = product.subCategoryId as unknown as TSubCategory;
+      const category = product.categoryId as unknown as TCategory;
+
+      return {
+        modelNo: product.modelNo,
+        name: product.name[lang],
+        type: product.type[lang],
+        // brand: product.brand.Name[lang],
+        desc: product.desc[lang],
+        stockQty: product.stockQty,
+        soldQty: product.soldQty,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        imageURLs: product.imageURLs,
+        Brand: {
+          ...brand,
+          Name: brand.Name[lang],
+        },
+        CategoryId: {
+          ...category,
+          Name: category.Name[lang],
+        },
+        subCategory: {
+          ...subCategory,
+          Name: subCategory.Name[lang],
+        },
+        
+        techSpecifications: product.techSpecifications,
+        status: product.status,
+        highlights: product.highlights[lang],
+      };
+    });
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+  }
+};
+
+// get products by category id 
+const getProductsByCategory = async (categoryId:string,lang: Language) => {
+  try {
+    const products = await ProductModel.find({ isDeleted: false, categoryId:categoryId })
+      .populate({
+        path: 'brand',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'categoryId',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'subCategoryId',
+        select: `Name.${lang}`,
+      })
+      .lean();
+
+    if (products.length === 0) {
+      throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+    }
+
+    return products.map((product) => {
+      const brand = product.brand as TBrand;
+      const subCategory = product.subCategoryId as unknown as TSubCategory;
+      const category = product.categoryId as unknown as TCategory;
+
+      return {
+        modelNo: product.modelNo,
+        name: product.name[lang],
+        type: product.type[lang],
+        // brand: product.brand.Name[lang],
+        desc: product.desc[lang],
+        stockQty: product.stockQty,
+        soldQty: product.soldQty,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        imageURLs: product.imageURLs,
+        Brand: {
+          ...brand,
+          Name: brand.Name[lang],
+        },
+        CategoryId: {
+          ...category,
+          Name: category.Name[lang],
+        },
+        subCategory: {
+          ...subCategory,
+          Name: subCategory.Name[lang],
+        },
+        
+        techSpecifications: product.techSpecifications,
+        status: product.status,
+        highlights: product.highlights[lang],
+      };
+    });
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+  }
+};
+
+const createProduct = async (
+  productData: CreateProductInput,
+): Promise<Product> => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -126,21 +255,20 @@ const createProduct = async (productData: CreateProductInput): Promise<Product> 
     // Commit the transaction
     await session.commitTransaction();
     return newProduct;
-
   } catch (err: any) {
     await session.abortTransaction();
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to create product: ${err.message}`);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      `Failed to create product: ${err.message}`,
+    );
   } finally {
     await session.endSession();
   }
-
 };
 
-
-
-// get  products by id 
+// get  products by id
 // const getProductById = async (productId: string, lang: Language) => {
- 
+
 //   try {
 //     const product = await ProductModel.findById(productId)
 //       .populate({
@@ -181,7 +309,7 @@ const createProduct = async (productData: CreateProductInput): Promise<Product> 
 //   }
 // };
 
-// get products by brand id 
+// get products by brand id
 // const getProductByBrandId = async (brandId: string, lang: Language) => {
 //   try {
 //     const products = await ProductModel.find({ Brand: brandId })
@@ -224,7 +352,6 @@ const createProduct = async (productData: CreateProductInput): Promise<Product> 
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
 //   }
 // };
-
 
 // const getProducts = async (  lang: string) => {
 //   try {
@@ -414,8 +541,9 @@ const createProduct = async (productData: CreateProductInput): Promise<Product> 
 // };
 
 export const productService = {
-  // getProductsByLanguage,
+  getProductsByLanguage,
   createProduct,
+  getProductsByCategory
   // getProductById,
   // getProductByBrandId,
   // getProducts,
