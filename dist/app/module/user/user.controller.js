@@ -12,32 +12,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUserController = void 0;
+exports.userController = void 0;
 const user_service_1 = require("./user.service");
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const user_interface_1 = require("./user.interface");
 // import userValidationSchemaZod from "./user.validation";
-const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createUserController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const user = req.body
     //saving to db
-    const result = yield user_service_1.userService.createUserInDb(req.body);
-    if (!result) {
-        return res
-            .status(404)
-            .json({
-            success: false,
-            message: 'user not created',
-            data: res
-        });
-    }
-    else {
+    try {
+        const result = yield user_service_1.userService.createUser(req.body, user_interface_1.UserRole.User);
         res.status(200).json({
             success: true,
             message: 'user is created successfully',
             data: result,
         });
+    }
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `user is not create ${error.message}`);
+    }
+}));
+const createAdminController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // const user = req.body
+    //saving to db
+    try {
+        const result = yield user_service_1.userService.createUser(req.body, user_interface_1.UserRole.Admin);
+        res.status(200).json({
+            success: true,
+            message: 'user is created successfully',
+            data: result,
+        });
+    }
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `user is not create ${error.message}`);
     }
 }));
 const allUsers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -184,8 +194,10 @@ const deleteSingleUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 
 //          });
 //     }
 // }
-exports.createUserController = {
-    createUser,
+exports.userController = {
+    // createUser,
+    createUserController,
+    createAdminController,
     allUsers,
     singleUserById,
     updateSingleUser,

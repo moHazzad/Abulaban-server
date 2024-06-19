@@ -35,34 +35,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryModel = void 0;
+exports.BrandModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-// import { TMainCategory } from "./Category.interface";
-const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
-const localizedCategorySchema = new mongoose_1.default.Schema({
-    en: { type: String, required: [true, 'en category title is required'] },
-    ar: { type: String, required: [true, 'Ar category title is required'] }
+const http_status_1 = __importDefault(require("http-status"));
+const localizedBrandSchema = new mongoose_1.default.Schema({
+    en: { type: String, required: [true, 'en Brand Name is required'] },
+    ar: { type: String, required: [true, 'Ar Brand Name is required'] },
 }, {
-    _id: false // Prevents Mongoose from creating `_id` for localized names
+    _id: false, // Prevents Mongoose from creating `_id` for localized names
 });
-const CategorySchema = new mongoose_1.Schema({
-    Name: localizedCategorySchema,
+const brandSchema = new mongoose_1.Schema({
+    Name: localizedBrandSchema,
     image: String,
-    // ParentCategory: { type: Schema.Types.ObjectId, default: null, ref: 'Category' } 
 }, {
-    timestamps: true // This adds createdAt and updatedAt fields automatically
+    timestamps: true, // This adds createdAt and updatedAt fields automatically
 });
-CategorySchema.pre('save', function (next) {
+brandSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.isModified('Name')) {
             // Assuming you want to check for existing categories by English title
-            const existingCategory = yield exports.CategoryModel.findOne({ 'Name.en': this.Name.en });
+            const existingCategory = yield exports.BrandModel.findOne({
+                'Name.en': this.Name.en,
+            });
             if (existingCategory) {
-                return next(new AppError_1.default(http_status_1.default.BAD_REQUEST, `A Category with '${this.Name.en}' already exists`));
+                return next(new AppError_1.default(http_status_1.default.BAD_REQUEST, `A Brand Name with '${this.Name.en}' already exists`));
             }
         }
         next();
     });
 });
-exports.CategoryModel = (0, mongoose_1.model)('Category', CategorySchema);
+exports.BrandModel = (0, mongoose_1.model)('Brand', brandSchema);

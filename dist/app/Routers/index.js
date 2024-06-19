@@ -3,38 +3,55 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 // import { CategoryRoute } from '../module/category/category.route';
 // import { CourseRoute } from '../module/course/course.route';
-const user_route_1 = require("../module/user/user.route");
-const auth_route_1 = require("../module/auth/auth.route");
-const room_route_1 = require("../module/room/room.route");
-const booking_route_1 = require("../module/booking/booking.route");
-const category_route_1 = require("../module/category/category.route");
-const review_route_1 = require("../module/review/review.route");
+// import { UserRoute } from '../module/user/user.route';
+// import { authRoutes } from '../module/auth/auth.route';
+// import { RoomRoute } from '../module/room/room.route';
+// import { bookingRoute } from '../module/booking/booking.route';
+// // import { CategoryRoute } from '../module/category/category.route';
+// import { RoomReviewRoute } from '../module/review/review.route';
+const products_route_1 = require("../module/Products/products.route");
+const subCategory_route_1 = require("../module/sub-category/subCategory.route");
+// import { MainCategoryRoute } from '../module/Category/Category.route';
+const brand_route_1 = require("../module/brand/brand.route");
+const Category_route_1 = require("../module/Category/Category.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
-    {
-        path: '/auth',
-        route: auth_route_1.authRoutes,
-    },
-    {
-        path: '/user',
-        route: user_route_1.UserRoute,
-    },
-    {
-        path: '/room',
-        route: room_route_1.RoomRoute,
-    },
+    // {
+    //   path: '/auth',
+    //   route: authRoutes,
+    // },
+    // {
+    //   path: '/user',
+    //   route: UserRoute,
+    // },
+    // {
+    //   path: '/room',
+    //   route: RoomRoute,
+    // },
     {
         path: '/category',
-        route: category_route_1.CategoryRoute,
+        route: Category_route_1.categoryRoute
     },
     {
-        path: '/booking',
-        route: booking_route_1.bookingRoute,
+        path: '/sub-category',
+        route: subCategory_route_1.SubCategoryRoute,
     },
     {
-        path: '/review',
-        route: review_route_1.RoomReviewRoute,
+        path: '/brand',
+        route: brand_route_1.BrandRoute,
     },
+    {
+        path: '/products',
+        route: products_route_1.productRoute,
+    },
+    // {
+    //   path: '/booking',
+    //   route: bookingRoute,
+    // },
+    // {
+    //   path: '/review',
+    //   route: RoomReviewRoute,
+    // },
     // {
     //   path: '/course',
     //   route: CourseRoute,

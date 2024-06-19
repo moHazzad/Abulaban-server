@@ -14,6 +14,7 @@ const router = express.Router()
 // router.get('/:productId',  productController.getProductHandler)
 router.get('/',  productController.getProductsController )
 router.get('/category/:categoryId', productController.getProductsByCategoryController);
+router.get('/subCategory/:subCategoryId', productController.getProductsBySubCategoryIdController);
 // router.get('/brand/:brandId', productController.getProductsByBrandIdController);
 router.post('/create',  validateRequest(ProductValidationSchema), productController.createProductController )
 // router.put('/:id',  productController.updateProductController)

@@ -27,47 +27,53 @@ exports.userService = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const mongoose_1 = __importDefault(require("mongoose"));
 const http_status_1 = __importDefault(require("http-status"));
+const user_interface_1 = require("./user.interface");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_model_1 = require("./user.model");
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 // import AppError from "../../Error/errors/appError";
-const createUserInDb = (userData) => __awaiter(void 0, void 0, void 0, function* () {
-    const session = yield mongoose_1.default.startSession();
-    session.startTransaction();
+const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield bcrypt_1.default.hash(password, 10);
+});
+const createUser = (userData, creatorRole) => __awaiter(void 0, void 0, void 0, function* () {
+    // Hash password
+    const hashedPassword = yield hashPassword(userData.passwordHash);
+    // Check role validity
+    if (userData.role !== user_interface_1.UserRole.User && creatorRole !== user_interface_1.UserRole.Admin) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Only admins can assign elevated roles.");
+    }
+    const newUser = new user_model_1.UserModel(Object.assign(Object.assign({}, userData), { passwordHash: hashedPassword }));
     try {
-        // const user = new UserModel(userData)
-        // const result = await user.save()
-        // Check if a user with the same email already exists
-        const existingUser = yield user_model_1.UserModel.findOne({ email: userData.email });
-        console.log(existingUser, 'aksdjjas');
-        if (existingUser) {
-            if (existingUser.isDeleted === true) {
-                throw new Error('This email is associated with a deleted account. Please contact admin for account recovery.');
-            }
-            else {
-                throw new Error('An account with this email already exists.');
-            }
-        }
-        const user = yield user_model_1.UserModel.create([userData], { session });
-        if (!user) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to create user');
-        }
-        yield session.commitTransaction();
-        yield session.endSession();
-        // Convert the Mongoose document to a plain JavaScript object
-        // const userObject = user;
-        // Remove the password field from the response
-        // delete userObject.password;
-        return user;
+        const savedUser = yield newUser.save();
+        return savedUser;
     }
-    catch (err) {
-        yield session.abortTransaction();
-        yield session.endSession();
-        throw new Error(err);
-    }
-    finally {
-        session.endSession();
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `user is not create ${error.message}`);
     }
 });
+// const createUser  = async (userData: User) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+// // Hash password
+//     const hashedPassword = await bcrypt.hash(userData.passwordHash, 10);
+//     // Prepare new user document
+//     const userDocument = new UserModel({
+//       ...userData,
+//       passwordHash: hashedPassword
+//     });
+//     try {
+//       const savedUser = await userDocument.save();
+//     await session.commitTransaction();
+//     await session.endSession();
+//     return savedUser;
+//   } catch (err: any) {
+//     await session.abortTransaction();
+//     await session.endSession();
+//     throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${err.message}`)
+//   }finally {
+//     session.endSession();
+//   }
+// };
 // //  retrieve all user with specific field
 const getAllUserUserFromDb = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.UserModel.aggregate([
@@ -161,7 +167,8 @@ const deleteUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
 //     }
 // }
 exports.userService = {
-    createUserInDb,
+    // createUserInDb,
+    createUser,
     getAllUserUserFromDb,
     getSingleUserById,
     updateUserInformation,

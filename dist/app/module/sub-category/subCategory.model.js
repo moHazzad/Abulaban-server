@@ -35,34 +35,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryModel = void 0;
+exports.SubCategoryModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-// import { TMainCategory } from "./Category.interface";
 const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
-const localizedCategorySchema = new mongoose_1.default.Schema({
-    en: { type: String, required: [true, 'en category title is required'] },
-    ar: { type: String, required: [true, 'Ar category title is required'] }
-}, {
-    _id: false // Prevents Mongoose from creating `_id` for localized names
-});
-const CategorySchema = new mongoose_1.Schema({
-    Name: localizedCategorySchema,
-    image: String,
-    // ParentCategory: { type: Schema.Types.ObjectId, default: null, ref: 'Category' } 
-}, {
-    timestamps: true // This adds createdAt and updatedAt fields automatically
-});
-CategorySchema.pre('save', function (next) {
+// SubCategory schema definition
+const subCategorySchema = new mongoose_1.Schema({
+    Name: {
+        en: { type: String, required: [true, 'English category title is required'] },
+        ar: { type: String, required: [true, 'Arabic category title is required'] }
+    },
+    image: {
+        type: String,
+        match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif)(\?.*)?$/, 'Please fill a valid image URL.']
+    },
+    CategoryId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'Category', // Replace 'MainCategory' with your main category model name if different
+        required: true
+    }
+}, { timestamps: true });
+// Pre-save middleware to check for duplicate category titles in English
+subCategorySchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (this.isModified('Name')) {
-            // Assuming you want to check for existing categories by English title
-            const existingCategory = yield exports.CategoryModel.findOne({ 'Name.en': this.Name.en });
+        if (this.isModified('categoryTitle')) {
+            const existingCategory = yield exports.SubCategoryModel.findOne({ 'Name.en': this.Name.en });
             if (existingCategory) {
-                return next(new AppError_1.default(http_status_1.default.BAD_REQUEST, `A Category with '${this.Name.en}' already exists`));
+                throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `A category with the title '${this.Name.en}' already exists.`);
             }
         }
         next();
     });
 });
-exports.CategoryModel = (0, mongoose_1.model)('Category', CategorySchema);
+// Creating the model from the schema
+exports.SubCategoryModel = mongoose_1.default.model('SubCategory', subCategorySchema);
