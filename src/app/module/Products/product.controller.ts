@@ -24,9 +24,7 @@ const getProductsController = async (
   }
 
   try {
-    const products = await productService.getProductsByLanguage(
-      lang as Language,
-    );
+    const products = await productService.getProductsByLanguage(lang as Language );
     return res.status(200).json({ success: true, data: products });
   } catch (error) {
     next(error);
@@ -75,6 +73,27 @@ const getProductsBySubCategoryIdController = async (
   }
 };
 
+const getProductsByBrandIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let { lang } = req.query;
+  const { brandId } = req.params;
+
+  // Set default language to 'ar' if not provided or invalid
+  if (lang !== 'en' && lang !== 'ar') {
+    lang = 'ar';
+  }
+
+  try {
+    const products = await productService.getProductsByBrandId( brandId, lang as Language, );
+    return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createProductController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Extract category data from request body
@@ -95,22 +114,23 @@ const createProductController = catchAsync(
   },
 );
 
-// const getProductHandler = async (req: Request, res: Response, next: NextFunction) => {
-//   const { productId } = req.params;
-//   let { lang} = req.query;
+const getSingleProductController = async (req: Request, res: Response, next: NextFunction) => {
+  const { productId } = req.params;
+  let { lang} = req.query;
 
-//   // Set default language to 'ar' if not provided or invalid
-// if (lang !== 'en' && lang !== 'ar') {
-//   lang = 'ar';
-// }
 
-//   try {
-//     const product = await productService.getProductById(productId, lang as Language );
-//     return res.status(200).json({ success: true, data: product });
-//   } catch (error) {
-//     next(error)
-//   }
-// };
+  // Set default language to 'ar' if not provided or invalid
+if (lang !== 'en' && lang !== 'ar') {
+  lang = 'ar';
+}
+
+  try {
+    const product = await productService.getProductById(productId, lang as Language );
+    return res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    next(error)
+  }
+};
 
 //  const getProductsByBrandIdController = async (req: Request, res: Response, next: NextFunction) => {
 //   const { brandId } = req.params;
@@ -229,7 +249,9 @@ export const productController = {
   getProductsController,
   createProductController,
   getProductsByCategoryController,
-  getProductsBySubCategoryIdController
+  getProductsBySubCategoryIdController,
+  getSingleProductController,
+  getProductsByBrandIdController
   // getProductHandler,
   // getProductsByBrandIdController
   // getProductController,

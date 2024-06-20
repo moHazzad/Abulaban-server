@@ -16,6 +16,9 @@ import { Language } from './product.controller';
 import { TBrand } from '../brand/brand.interface';
 import { TSubCategory } from '../sub-category/subCategory.interface';
 import { TCategory } from '../Category/Category.interface';
+// import { TBrand } from '../brand/brand.interface';
+// import { TSubCategory } from '../sub-category/subCategory.interface';
+// import { TCategory } from '../Category/Category.interface';
 // import { TBrand } from '../module/brand/brand.interface';
 // import { TSubCategory } from '../module/sub-category/subCategory.interface';
 // import { Language } from './product.controller';
@@ -25,6 +28,7 @@ import { TCategory } from '../Category/Category.interface';
 // const isCategoryPopulated = (category: any): category is TSubCategory => {
 //   return category && typeof category === 'object' && 'categoryTitle' in category;
 // };
+
 
 // const createProduct = async (productData: Product) => {
 //   const session = await mongoose.startSession();
@@ -116,6 +120,70 @@ import { TCategory } from '../Category/Category.interface';
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
 //   }
 // };
+
+const getProductById = async (productId: string, lang: Language) => {
+
+  try {
+    const product = await ProductModel.findById({ isDeleted: false, _id:productId })
+    .populate({
+      path: 'brand',
+      // select: `Name.${lang}`,
+    })
+    .populate({
+      path: 'categoryId',
+      // select: `Name.${lang}`,
+    })
+    .populate({
+      path: 'subCategoryId',
+      select: `Name.${lang}`,
+    }).lean() ;
+
+    if (!product) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
+    }
+
+    const brand = product.brand as TBrand;
+    const category = product.categoryId as unknown as TCategory;
+    const subCategory = product.subCategoryId as unknown as TSubCategory;
+
+    // Extract and return the localized fields based on the requested language
+    const localizedProduct = {
+      ...product,
+        modelNo: product.modelNo,
+        name: product.name[lang],
+        type: product.type[lang],
+        // brand: product.brand.Name[lang],
+        desc: product.desc[lang],
+        stockQty: product.stockQty,
+        soldQty: product.soldQty,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        imageURLs: product.imageURLs,
+        Brand: {
+          ...brand,
+          Name: brand.Name[lang],
+          image: brand.image
+        },
+        CategoryId: {
+          ...category,
+          Name: category.Name[lang],
+        },
+        SubCategory: {
+          ...subCategory,
+          Name: subCategory.Name[lang],
+        },
+        
+        techSpecifications: product.techSpecifications,
+        status: product.status,
+        highlights: product.highlights[lang],
+    };
+
+    return localizedProduct;
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get product: ${error}`);
+  }
+};
+
 const getProductsByLanguage = async (lang: Language) => {
   try {
     const products = await ProductModel.find({ isDeleted: false })
@@ -143,6 +211,7 @@ const getProductsByLanguage = async (lang: Language) => {
       const category = product.categoryId as unknown as TCategory;
 
       return {
+        ...product,
         modelNo: product.modelNo,
         name: product.name[lang],
         type: product.type[lang],
@@ -161,7 +230,7 @@ const getProductsByLanguage = async (lang: Language) => {
           ...category,
           Name: category.Name[lang],
         },
-        subCategory: {
+        SubCategory: {
           ...subCategory,
           Name: subCategory.Name[lang],
         },
@@ -175,6 +244,7 @@ const getProductsByLanguage = async (lang: Language) => {
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
   }
 };
+
 
 // get products by category id 
 const getProductsByCategory = async (categoryId:string,lang: Language) => {
@@ -204,6 +274,7 @@ const getProductsByCategory = async (categoryId:string,lang: Language) => {
       const category = product.categoryId as unknown as TCategory;
 
       return {
+        ...product,
         modelNo: product.modelNo,
         name: product.name[lang],
         type: product.type[lang],
@@ -223,7 +294,7 @@ const getProductsByCategory = async (categoryId:string,lang: Language) => {
           ...category,
           Name: category.Name[lang],
         },
-        subCategory: {
+        SubCategory: {
           ...subCategory,
           Name: subCategory.Name[lang],
         },
@@ -266,6 +337,7 @@ const getProductsBySubCategoryId = async (subCategoryId:string,lang: Language) =
       const category = product.categoryId as unknown as TCategory;
 
       return {
+        ...product,
         modelNo: product.modelNo,
         name: product.name[lang],
         type: product.type[lang],
@@ -285,7 +357,70 @@ const getProductsBySubCategoryId = async (subCategoryId:string,lang: Language) =
           ...category,
           Name: category.Name[lang],
         },
-        subCategory: {
+        SubCategory: {
+          ...subCategory,
+          Name: subCategory.Name[lang],
+        },
+        
+        techSpecifications: product.techSpecifications,
+        status: product.status,
+        highlights: product.highlights[lang],
+      };
+    });
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+  }
+};
+
+// get products but brnad 
+const getProductsByBrandId = async (brandId:string,lang: Language) => {
+  try {
+    const products = await ProductModel.find({ isDeleted: false, brand:brandId })
+      .populate({
+        path: 'brand',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'categoryId',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'subCategoryId',
+        select: `Name.${lang}`,
+      })
+      .lean();
+
+    if (products.length === 0) {
+      throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+    }
+
+    return products.map((product) => {
+      const brand = product.brand as TBrand;
+      const subCategory = product.subCategoryId as unknown as TSubCategory;
+      const category = product.categoryId as unknown as TCategory;
+
+      return {
+        ...product,
+        modelNo: product.modelNo,
+        name: product.name[lang],
+        type: product.type[lang],
+        // brand: product.brand.Name[lang],
+        desc: product.desc[lang],
+        stockQty: product.stockQty,
+        soldQty: product.soldQty,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        imageURLs: product.imageURLs,
+        Brand: {
+          ...brand,
+          Name: brand.Name[lang],
+          image: brand.image
+        },
+        CategoryId: {
+          ...category,
+          Name: category.Name[lang],
+        },
+        SubCategory: {
           ...subCategory,
           Name: subCategory.Name[lang],
         },
@@ -330,47 +465,7 @@ const createProduct = async (
 };
 
 // get  products by id
-// const getProductById = async (productId: string, lang: Language) => {
 
-//   try {
-//     const product = await ProductModel.findById(productId)
-//       .populate({
-//         path: 'Brand',
-//         select: `Name.${lang} Name.ar`,
-//       })
-//       .populate({
-//         path: 'CategoryId',
-//         select: `categoryTitle.${lang} categoryTitle.ar`,
-//       })
-//       .lean();
-
-//     if (!product) {
-//       throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
-//     }
-
-//     const brand = product.Brand as TBrand;
-//     const category = product.CategoryId as unknown as TSubCategory;
-
-//     // Extract and return the localized fields based on the requested language
-//     const localizedProduct = {
-//       ...product,
-//       Name: product.Name[lang],
-//       Desc: product.Desc[lang],
-//       Brand: {
-//         ...brand,
-//         Name: brand.Name[lang],
-//       },
-//       CategoryId: {
-//         ...category,
-//         categoryTitle: category.categoryTitle[lang],
-//       },
-//     };
-
-//     return localizedProduct;
-//   } catch (error: any) {
-//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get product: ${error.message}`);
-//   }
-// };
 
 // get products by brand id
 // const getProductByBrandId = async (brandId: string, lang: Language) => {
@@ -607,7 +702,10 @@ export const productService = {
   getProductsByLanguage,
   createProduct,
   getProductsByCategory,
-  getProductsBySubCategoryId
+  getProductsBySubCategoryId,
+  getProductById,
+  getProductsByBrandId
+  
   // getProductById,
   // getProductByBrandId,
   // getProducts,

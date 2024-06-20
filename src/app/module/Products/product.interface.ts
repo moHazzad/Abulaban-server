@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Document, Types } from 'mongoose';
+import { TBrand } from '../brand/brand.interface';
+import { TSubCategory } from '../sub-category/subCategory.interface';
+import { TCategory } from '../Category/Category.interface';
 
 // export interface Review extends Document {
 //   userId: Types.ObjectId;
@@ -33,17 +36,17 @@ export enum ProductStatus {
   DISCONTINUED = 'discontinued'
 }
 
-interface TBrand extends Document {
-  Name: LocalizedString;
-}
+// interface TBrand extends Document {
+//   Name: LocalizedString;
+// }
 
-interface TCategory extends Document {
-  Name: LocalizedString;
-}
+// interface TCategory extends Document {
+//   Name: LocalizedString;
+// }
 
-interface TSubCategory extends Document {
-  Name: LocalizedString;
-}
+// interface TSubCategory extends Document {
+//   Name: LocalizedString;
+// }
 
 export interface Product extends Document {
   modelNo: string;
