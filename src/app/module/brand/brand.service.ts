@@ -56,7 +56,7 @@ const getBrandNames = async (lang: Language) => {
   // Extract the _id and names in the specified language
   const brandNames = brands.map((brand) => ({
     _id: brand._id,
-    name: brand.Name[lang],
+    Name: brand.Name[lang],
     image:brand.image
   }));
 
@@ -73,7 +73,7 @@ const getBrandById = async (id: string, lang: Language) => {
   
     return {
       _id: brand._id,
-      name: brand.Name[lang]
+      Name: brand.Name[lang]
     };
   };
 
