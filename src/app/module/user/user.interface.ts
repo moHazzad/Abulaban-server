@@ -8,7 +8,12 @@ export enum UserRole {
 export enum UserStatus {
   Active = 'Active',
   Suspended = 'Suspended',
-  Deleted = 'Deleted'
+  Deleted = 'Deleted',
+}
+
+export interface ILogin {
+  email: string;
+  password: string;
 }
 
 export interface User extends Document {
@@ -26,7 +31,6 @@ export interface User extends Document {
   updatedAt: Date;
 }
 
-
 // import mongoose from 'mongoose';
 
 // export type Address = {
@@ -35,13 +39,13 @@ export interface User extends Document {
 //   state: string;
 //   postalCode: string;
 //   Province: string;
-//   country: string; 
+//   country: string;
 // };
 
 // export type Profile = {
 //   firstName: string;
 //   lastName: string;
-//   phone: string; 
+//   phone: string;
 // };
 
 // export enum UserRole {
@@ -61,15 +65,13 @@ export interface User extends Document {
 //   passwordHash: string;
 //   role: UserRole;
 //   profile: Profile;
-//   status: UserStatus; 
-//   shippingAddress: Address; 
-//   billingAddress: Address; 
+//   status: UserStatus;
+//   shippingAddress: Address;
+//   billingAddress: Address;
 //   lastLoginDate: Date;
 //   createdAt: Date;
 //   updatedAt: Date;
 // }
-
-
 
 // import mongoose from 'mongoose';
 
@@ -79,13 +81,13 @@ export interface User extends Document {
 //   state: string;
 //   postalCode: string;
 //   Province:string;
-//   country: string; 
+//   country: string;
 // };
 
 // export type Profile = {
 //   firstName: string;
 //   lastName: string;
-//   phone: string; 
+//   phone: string;
 // };
 
 // export enum UserRole {
@@ -106,11 +108,10 @@ export interface User extends Document {
 //   passwordHash: string;
 //   role: UserRole;
 //   profile: Profile;
-//   status: UserStatus; 
-//   shippingAddress: Address; 
-//   billingAddress: Address; 
+//   status: UserStatus;
+//   shippingAddress: Address;
+//   billingAddress: Address;
 //   lastloginDate: Date;
 //   createdAt: Date;
 //   updatedAt: Date;
 // }
-

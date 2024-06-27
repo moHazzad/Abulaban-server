@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
 // import { UserModel } from './user.model';
 import AppError from '../../Error/errors/AppError';
-import { User } from './user.interface';
+import { ILogin, User } from './user.interface';
 import UserModel from './user.model';
 import { LoginInput } from './user.validation';
 import { jwtHelpers } from '../../helper/jwtHelper';
@@ -42,7 +42,8 @@ const register = async (userData: User) => {
   }
 };
 
- const login = async (loginData: LoginInput) => {
+ const login = async (loginData: ILogin) => {
+
   const user = await UserModel.findOne({ 'profile.email': loginData.email });
 
   if (!user) {
@@ -60,12 +61,12 @@ const register = async (userData: User) => {
   }
 
   const token = jwtHelpers.createToken(
-    { id: user._id, email: user.profile.email, role: user.role },
+    { id: user._id, name: user.profile.firstName, phone: user.profile.phone, email: user.profile.email, role: user.role },
     config.jwt_access_token, // Use the imported configuration value
     { expiresIn: config.jwt_access_expires_in } // Use the imported configuration value
   );
 
-  return { user, token };
+  return {  token };
 };
 
 // const createUser = async (userData: User, creatorRole: UserRole) => {
