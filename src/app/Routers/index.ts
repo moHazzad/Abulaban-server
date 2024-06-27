@@ -12,6 +12,7 @@ import { SubCategoryRoute } from '../module/sub-category/subCategory.route';
 // import { MainCategoryRoute } from '../module/Category/Category.route';
 import { BrandRoute } from '../module/brand/brand.route';
 import { categoryRoute } from '../module/Category/Category.route';
+import { UserRoute } from '../module/user/user.route';
 
 
 
@@ -25,13 +26,13 @@ const moduleRoutes = [
     //   route: authRoutes,
     // },
     // {
-    //   path: '/user',
-    //   route: UserRoute,
-    // },
-    // {
-    //   path: '/room',
-    //   route: RoomRoute,
-    // },
+      //   path: '/room',
+      //   route: RoomRoute,
+      // },
+      {
+        path: '/user',
+        route: UserRoute,
+      },
     {
       path: '/category',
       route: categoryRoute

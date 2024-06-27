@@ -1,66 +1,116 @@
 /* eslint-disable no-unused-vars */
-import mongoose from 'mongoose';
-
-export type Address = {
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country?: string; // Optional for admin/moderator
-};
-
-export type Profile = {
-  firstName: string;
-  lastName: string;
-  phone?: string; // Optional for admin/moderator
-};
-
 export enum UserRole {
-  User = 'user',
-  Admin = 'admin',
-  Moderator = 'moderator'
+  superAdmin = 'superAdmin',
+  admin = 'admin',
+  user = 'user',
 }
 
 export enum UserStatus {
   Active = 'Active',
   Suspended = 'Suspended',
-  Deleted = 'Deleted' // Optional, if you want to manage soft-deletes
+  Deleted = 'Deleted'
 }
 
-export interface User extends mongoose.Document {
-  username: string;
-  email: string;
-  passwordHash: string;
+export interface User extends Document {
+  password: string;
   role: UserRole;
-  profile: Profile;
-  status: UserStatus; // New field for user status
-  address?: Address; // Optional for admin/moderator
+  profile: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  status: UserStatus;
+  lastLoginDate: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
 
+// import mongoose from 'mongoose';
 
-// import { USER_ROLE } from "../../conestants/user.contents";
-
-// export type UserAddress = {
-//   street?: string;
-//   city?: string;
-//   country?: string;
+// export type Address = {
+//   address: string;
+//   city: string;
+//   state: string;
+//   postalCode: string;
+//   Province: string;
+//   country: string; 
 // };
 
-// export type TUser = {
+// export type Profile = {
 //   firstName: string;
 //   lastName: string;
-//   // fullName?: string
-//   password: string;
-//   passwordChangedAt?: Date,
-//   email: string;
-//   phone: string;
-//   role: 'user' | 'admin',
-//   isActive?: boolean;
-//   isDeleted?: boolean;
-//   address?: UserAddress;
+//   phone: string; 
 // };
 
-// export type TUserRole = keyof typeof USER_ROLE 
+// export enum UserRole {
+//   SuperAdmin = 'superAdmin',
+//   Admin = 'admin',
+//   User = 'user',
+// }
+
+// export enum UserStatus {
+//   Active = 'Active',
+//   Suspended = 'Suspended',
+//   Deleted = 'Deleted'
+// }
+
+// export interface User extends mongoose.Document {
+//   email: string;
+//   passwordHash: string;
+//   role: UserRole;
+//   profile: Profile;
+//   status: UserStatus; 
+//   shippingAddress: Address; 
+//   billingAddress: Address; 
+//   lastLoginDate: Date;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+
+
+// import mongoose from 'mongoose';
+
+// export type Address = {
+//   address: string;
+//   city: string;
+//   state: string;
+//   postalCode: string;
+//   Province:string;
+//   country: string; 
+// };
+
+// export type Profile = {
+//   firstName: string;
+//   lastName: string;
+//   phone: string; 
+// };
+
+// export enum UserRole {
+//   superAdmin = 'superAdmin',
+//   admin = 'admin',
+//   user = 'user',
+// }
+
+// export enum UserStatus {
+//   Active = 'Active',
+//   Suspended = 'Suspended',
+//   Deleted = 'Deleted'
+// }
+
+// export interface User extends mongoose.Document {
+//   username: string;
+//   email: string;
+//   passwordHash: string;
+//   role: UserRole;
+//   profile: Profile;
+//   status: UserStatus; 
+//   shippingAddress: Address; 
+//   billingAddress: Address; 
+//   lastloginDate: Date;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+

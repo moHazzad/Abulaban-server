@@ -9,24 +9,32 @@ import { UserRole } from "./user.interface";
 // import userValidationSchemaZod from "./user.validation";
 
 
-const createUserController  = catchAsync(async(req: Request, res: Response) =>{
-    
-    // const user = req.body
-    
-    //saving to db
-    try {
-      const result = await userService.createUser(req.body, UserRole.User);
-      res.status(200).json({
-        success: true,
-        message: 'user is created successfully',
-        data: result,
-      });
-    } catch (error: any) {
-      throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
-    }
-     
+const registerUserController = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.body,'register');
+  try {
+    const result = await userService.register(req.body);
+    res.status(200).json({
+      success: true,
+      message: 'User created successfully',
+      data: result,
+    });
+  } catch (error: any) {
+    throw new AppError(httpStatus.BAD_REQUEST, `User not created: ${error.message}`);
+  }
+});
 
-})
+const loginUserController = catchAsync(async (req: Request, res: Response) => {
+  try {
+    const result = await userService.login(req.body);
+    res.status(200).json({
+      success: true,
+      message: 'User logged in successfully',
+      data: result,
+    });
+  } catch (error: any) {
+    throw new AppError(httpStatus.BAD_REQUEST, `Filed to login: ${error.message}`);
+  }
+});
 
 
 const createAdminController  = catchAsync(async(req: Request, res: Response) =>{
@@ -222,7 +230,8 @@ const deleteSingleUser = catchAsync(async (req: Request, res:Response) => {
 
 export const userController = {
     // createUser,
-    createUserController ,
+    registerUserController ,
+    loginUserController,
     createAdminController,
     allUsers,
     singleUserById,

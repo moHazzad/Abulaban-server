@@ -1,40 +1,98 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
-import { User, UserRole } from './user.interface';
 import bcrypt from 'bcrypt';
-import { UserModel } from './user.model';
+// import { UserModel } from './user.model';
 import AppError from '../../Error/errors/AppError';
+import { User } from './user.interface';
+import UserModel from './user.model';
+import { LoginInput } from './user.validation';
+import { jwtHelpers } from '../../helper/jwtHelper';
+import config from '../../config';
 // import AppError from "../../Error/errors/appError";
 
+// const hashPassword = async (password: string) => {
+//   return await bcrypt.hash(password, 10);
+// };
 
-const hashPassword = async (password: string) => {
-  return await bcrypt.hash(password, 10);
-};
+const register = async (userData: User) => {
+  const existingUser = await UserModel.findOne({ 'profile.email': userData.profile.email });
 
-const createUser = async (userData: User, creatorRole: UserRole) => {
-  // Hash password
-  const hashedPassword = await hashPassword(userData.passwordHash);
-
-  // Check role validity
-  if (userData.role !== UserRole.User && creatorRole !== UserRole.Admin) {
-    throw new AppError(httpStatus.FORBIDDEN, "Only admins can assign elevated roles.");
+  if (existingUser) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Email already in use');
   }
 
-  const newUser = new UserModel({
-    ...userData,
-    passwordHash: hashedPassword
+  const user = new UserModel({
+    password: userData.password,
+    profile: userData.profile,
+    // password: userData.password,
+    // profile: {
+    //   firstName: userData.profile.firstName,
+    //   lastName: userData.profile.lastName,
+    //   phone: userData.profile.phone,
+    //   email: userData.profile.email,
+    // },
   });
 
   try {
-    const savedUser = await newUser.save();
+    const savedUser = await user.save();
     return savedUser;
   } catch (error: any) {
-    throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+    throw new AppError(httpStatus.BAD_REQUEST, `User not created: ${error.message}`);
   }
 };
+
+ const login = async (loginData: LoginInput) => {
+  const user = await UserModel.findOne({ 'profile.email': loginData.email });
+
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
+  }
+
+  if (user.status === 'Deleted') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user account has been deleted');
+  }
+
+  const isPasswordMatch = await bcrypt.compare(loginData.password, user.password);
+
+  if (!isPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
+  }
+
+  const token = jwtHelpers.createToken(
+    { id: user._id, email: user.profile.email, role: user.role },
+    config.jwt_access_token, // Use the imported configuration value
+    { expiresIn: config.jwt_access_expires_in } // Use the imported configuration value
+  );
+
+  return { user, token };
+};
+
+// const createUser = async (userData: User, creatorRole: UserRole) => {
+//   // Hash password
+//   const hashedPassword = await hashPassword(userData.passwordHash);
+
+//   // Check role validity
+//   if (userData.role !== UserRole.User && creatorRole !== UserRole.Admin) {
+//     throw new AppError(httpStatus.FORBIDDEN, "Only admins can assign elevated roles.");
+//   }
+
+//   const newUser = new UserModel({
+//     ...userData,
+//     passwordHash: hashedPassword
+//   });
+
+//   try {
+//     const savedUser = await newUser.save();
+//     return savedUser;
+//   } catch (error: any) {
+//     throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+//   }
+// };
+// <-------- end------>
+
 // const createUser  = async (userData: User) => {
-  
+
 //   const session = await mongoose.startSession();
 //   session.startTransaction();
 
@@ -47,20 +105,19 @@ const createUser = async (userData: User, creatorRole: UserRole) => {
 //       passwordHash: hashedPassword
 //     });
 
-
 //     try {
-      
+
 //       const savedUser = await userDocument.save();
-      
+
 //     await session.commitTransaction();
 //     await session.endSession();
 //     return savedUser;
-       
+
 //   } catch (err: any) {
 //     await session.abortTransaction();
 //     await session.endSession();
 //     throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${err.message}`)
-    
+
 //   }finally {
 //     session.endSession();
 //   }
@@ -134,7 +191,6 @@ const deleteUser = async (userId: string) => {
     await session.endSession();
 
     return deletedUser;
-
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
@@ -194,7 +250,8 @@ const deleteUser = async (userId: string) => {
 
 export const userService = {
   // createUserInDb,
-  createUser,
+  register,
+  login,
   getAllUserUserFromDb,
   getSingleUserById,
   updateUserInformation,
