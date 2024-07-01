@@ -13,6 +13,7 @@ import { SubCategoryRoute } from '../module/sub-category/subCategory.route';
 import { BrandRoute } from '../module/brand/brand.route';
 import { categoryRoute } from '../module/Category/Category.route';
 import { UserRoute } from '../module/user/user.route';
+import { orderRoute } from '../module/Orders/booking.route';
 
 
 
@@ -49,10 +50,10 @@ const moduleRoutes = [
       path: '/products',
       route: productRoute,
     },
-    // {
-    //   path: '/booking',
-    //   route: bookingRoute,
-    // },
+    {
+      path: '/orders',
+      route: orderRoute,
+    },
     // {
     //   path: '/review',
     //   route: RoomReviewRoute,

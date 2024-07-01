@@ -5,7 +5,7 @@ import catchAsync from "../../utils/catchAsync";
 import AppError from "../../Error/errors/AppError";
 import httpStatus from "http-status";
 import sendResponse from "../../utils/sendResponse";
-import { UserRole } from "./user.interface";
+// import { UserRole } from "./user.interface";
 // import userValidationSchemaZod from "./user.validation";
 
 
@@ -36,47 +36,10 @@ const loginUserController = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
-
-const createAdminController  = catchAsync(async(req: Request, res: Response) =>{
-    
-    // const user = req.body
-    
-    //saving to db
-    try {
-      const result = await userService.createUser(req.body, UserRole.Admin);
-      res.status(200).json({
-        success: true,
-        message: 'user is created successfully',
-        data: result,
-      });
-    } catch (error: any) {
-      throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
-    }
-     
-
-})
-
-const allUsers = catchAsync(async(req: Request, res: Response)=>{
-    
-        const users = await userService.getAllUserUserFromDb()
-        if (!users) {
-            return res
-              .status(404)
-              .json({ success: false, message: 'No users found' });
-          } else {
-            res.status(200).json({
-              success: true,
-              message: 'users data are retrieved',
-              data: users,
-            });
-          }
-
-})
-
 const singleUserById = catchAsync(async(req: Request, res: Response)=>{
   const userId = (req.params.userId);
   
-      const user = await userService.getSingleUserById(userId)
+      const user = await userService.singleUser(userId)
       if (!user) {
           throw new AppError( httpStatus.NOT_FOUND,'user is not found')
         } else {
@@ -93,12 +56,14 @@ const singleUserById = catchAsync(async(req: Request, res: Response)=>{
 })
 
 // update user info 
-const updateSingleUser = catchAsync(async(req: Request, res: Response)=>{
+const updateSingleUserController = catchAsync(async(req: Request, res: Response)=>{
   // getting user id to find the exect user and the body of update info 
   const userId = (req.params.userId)
   const updateInfo = req.body
+  console.log(updateInfo,'data ');
+  console.log(userId,'isss');
   
-      const updateUser = await userService.updateUserInformation(userId, updateInfo)
+      const updateUser = await userService.updateSingleUser(userId, updateInfo)
       if (!updateUser) {
           throw new AppError(
             httpStatus.BAD_REQUEST,
@@ -118,27 +83,68 @@ const updateSingleUser = catchAsync(async(req: Request, res: Response)=>{
 
 })
 
-const deleteSingleUser = catchAsync(async (req: Request, res:Response) => {
-  const userId = req.params.userId
-  const result = await userService.deleteUser(userId)
+
+
+// const createAdminController  = catchAsync(async(req: Request, res: Response) =>{
+    
+//     // const user = req.body
+    
+//     //saving to db
+//     try {
+//       const result = await userService.createUser(req.body, UserRole.Admin);
+//       res.status(200).json({
+//         success: true,
+//         message: 'user is created successfully',
+//         data: result,
+//       });
+//     } catch (error: any) {
+//       throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+//     }
+     
+
+// })
+
+// const allUsers = catchAsync(async(req: Request, res: Response)=>{
+    
+//         const users = await userService.getAllUserUserFromDb()
+//         if (!users) {
+//             return res
+//               .status(404)
+//               .json({ success: false, message: 'No users found' });
+//           } else {
+//             res.status(200).json({
+//               success: true,
+//               message: 'users data are retrieved',
+//               data: users,
+//             });
+//           }
+
+// })
+
+
+
+
+// const deleteSingleUser = catchAsync(async (req: Request, res:Response) => {
+//   const userId = req.params.userId
+//   const result = await userService.deleteUser(userId)
   
-      if (!result) {
-        throw new AppError(
-          httpStatus.NOT_FOUND,
-          'No user with given ID was found.'
-        )
+//       if (!result) {
+//         throw new AppError(
+//           httpStatus.NOT_FOUND,
+//           'No user with given ID was found.'
+//         )
           
-      } else {
-          sendResponse(res,{
-            statusCode: httpStatus.OK,
-            success: true,
-            message:"Delete Successfull",
-            data: null
-          }
-          )
-      }
+//       } else {
+//           sendResponse(res,{
+//             statusCode: httpStatus.OK,
+//             success: true,
+//             message:"Delete Successfull",
+//             data: null
+//           }
+//           )
+//       }
    
-})
+// })
 
 // const addOrderToUserController = async(req: Request, res:Response)=>{
 //     const userId = parseInt(req.params.userId)
@@ -232,11 +238,12 @@ export const userController = {
     // createUser,
     registerUserController ,
     loginUserController,
-    createAdminController,
-    allUsers,
     singleUserById,
-    updateSingleUser,
-    deleteSingleUser,
+    updateSingleUserController
+    // allUsers,
+   
+    // updateSingleUser,
+    // deleteSingleUser,
     // addOrderToUserController,
     // getSingleUserOrder,
     // getOrderTotalPrice

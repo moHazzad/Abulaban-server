@@ -1,6 +1,8 @@
+import { USER_ROLE } from "../../conestants/user.contents";
+
 /* eslint-disable no-unused-vars */
 export enum UserRole {
-  superAdmin = 'superAdmin',
+  super = 'super',
   admin = 'admin',
   user = 'user',
 }
@@ -16,6 +18,14 @@ export interface ILogin {
   password: string;
 }
 
+export interface Address {
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 export interface User extends Document {
   password: string;
   role: UserRole;
@@ -25,11 +35,16 @@ export interface User extends Document {
     email: string;
     phone: string;
   };
+  shippingAddress?: Address;
+  // billingAddress?: Address;
   status: UserStatus;
   lastLoginDate: Date;
+  isDelete: boolean,
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type TUserRole = keyof typeof USER_ROLE 
 
 // import mongoose from 'mongoose';
 

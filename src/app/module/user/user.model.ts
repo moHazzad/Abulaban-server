@@ -2,6 +2,15 @@ import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { User, UserRole, UserStatus } from './user.interface';
 
+const AddressSchema: Schema = new Schema({
+  address: { type: String },
+  city: { type: String },
+  state: { type: String },
+  postalCode: { type: String },
+  country: { type: String },
+}, { _id: false });
+
+
 const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   role: { type: String, enum: Object.values(UserRole), default: UserRole.user },
@@ -11,7 +20,10 @@ const UserSchema: Schema = new Schema({
     phone: { type: String, required: true },
     email: { type: String, unique: true, required: true },
   },
+  shippingAddress: { type: AddressSchema, required: false, default: {} },
+  // billingAddress: { type: AddressSchema, required: false, default: {} },
   status: { type: String, enum: Object.values(UserStatus), default: UserStatus.Active },
+  isDelete:{ type: Boolean,  default: false },
   lastLoginDate: { type: Date },
 }, { timestamps: true });
 

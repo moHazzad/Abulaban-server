@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import AppError from '../../Error/errors/AppError';
 import { ILogin, User } from './user.interface';
 import UserModel from './user.model';
-import { LoginInput } from './user.validation';
+// import { LoginInput } from './user.validation';
 import { jwtHelpers } from '../../helper/jwtHelper';
 import config from '../../config';
 // import AppError from "../../Error/errors/appError";
@@ -16,13 +16,16 @@ import config from '../../config';
 // };
 
 const register = async (userData: User) => {
-  const existingUser = await UserModel.findOne({ 'profile.email': userData.profile.email });
+  const existingUser = await UserModel.findOne({
+    'profile.email': userData.profile.email,
+  });
 
   if (existingUser) {
     throw new AppError(httpStatus.FORBIDDEN, 'Email already in use');
   }
 
   const user = new UserModel({
+    ...userData,
     password: userData.password,
     profile: userData.profile,
     // password: userData.password,
@@ -38,36 +41,117 @@ const register = async (userData: User) => {
     const savedUser = await user.save();
     return savedUser;
   } catch (error: any) {
-    throw new AppError(httpStatus.BAD_REQUEST, `User not created: ${error.message}`);
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `User not created: ${error.message}`,
+    );
   }
 };
 
- const login = async (loginData: ILogin) => {
-
+const login = async (loginData: ILogin) => {
   const user = await UserModel.findOne({ 'profile.email': loginData.email });
 
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
   }
 
-  if (user.status === 'Deleted') {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user account has been deleted');
+  if (user.isDelete === true) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'This user account has been deleted',
+    );
   }
 
-  const isPasswordMatch = await bcrypt.compare(loginData.password, user.password);
+  const isPasswordMatch = await bcrypt.compare(
+    loginData.password,
+    user.password,
+  );
 
   if (!isPasswordMatch) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
   }
 
   const token = jwtHelpers.createToken(
-    { id: user._id, name: user.profile.firstName, phone: user.profile.phone, email: user.profile.email, role: user.role },
+    {
+      id: user._id,
+      name: user.profile.firstName,
+      phone: user.profile.phone,
+      email: user.profile.email,
+      role: user.role,
+    },
     config.jwt_access_token, // Use the imported configuration value
-    { expiresIn: config.jwt_access_expires_in } // Use the imported configuration value
+    { expiresIn: config.jwt_access_expires_in }, // Use the imported configuration value
   );
 
-  return {  token };
+  return { token };
 };
+
+const singleUser = async (userId: string) => {
+  try {
+    const result = await UserModel.findOne({ _id: userId, isDelete: false });
+    return result;
+  } catch (error) {
+    console.error('Error finding user by ID:', error);
+    throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+  }
+};
+
+// const updateSingleUser = async (userId: string, updateData: Partial<User>) => {
+//   try {
+//     const user = await UserModel.findById(userId);
+//     if (!user) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//     }
+
+//    // Update only the fields provided in the updateData
+//    Object.keys(updateData).forEach((key) => {
+//      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//      // @ts-ignore
+//     if (updateData[key] !== undefined) {
+//       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//       // @ts-ignore
+//       user[key] = updateData[key];
+//     }
+//   });
+
+//     await user.save();
+//     return user;
+//   } catch (error:any) {
+//     throw new AppError(httpStatus.BAD_REQUEST, `Unable to update user ${error.message}`);
+//   }
+// };
+
+const updateSingleUser = async (userId: string, updateData: Partial<any>) => {
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    // Update only the fields provided in the updateData
+    for (const key of Object.keys(updateData)) {
+      // Check if the updateData key is an object (like profile or shippingAddress)
+      if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key]) && updateData[key] !== null) {
+        // Update nested fields
+        for (const nestedKey of Object.keys(updateData[key])) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          user[key][nestedKey] = updateData[key][nestedKey];
+        }
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        user[key] = updateData[key];
+      }
+    }
+
+    await user.save();
+    return user;
+  } catch (error: any) {
+    throw new AppError(httpStatus.BAD_REQUEST, `Unable to update user ${error.message}`);
+  }
+};
+
 
 // const createUser = async (userData: User, creatorRole: UserRole) => {
 //   // Hash password
@@ -146,33 +230,33 @@ const getAllUserUserFromDb = async () => {
   return result;
 };
 
-const getSingleUserById = async (userId: string) => {
-  const result = await UserModel.findById(userId); //finding by _id
-  return result;
-};
+// const getSingleUserById = async (userId: string) => {
+//   const result = await UserModel.findById(userId); //finding by _id
+//   return result;
+// };
 
-const updateUserInformation = async (
-  userId: string,
-  updateInfo: Partial<TUser>,
-) => {
-  const { ...updateUserInfoPayload } = updateInfo;
-  const modifiedUpdatedData: Record<string, unknown> = {
-    ...updateUserInfoPayload,
-  };
+// const updateUserInformation = async (
+//   userId: string,
+//   updateInfo: Partial<User>,
+// ) => {
+//   const { ...updateUserInfoPayload } = updateInfo;
+//   const modifiedUpdatedData: Record<string, unknown> = {
+//     ...updateUserInfoPayload,
+//   };
 
-  if (updateUserInformation && Object.keys(updateUserInformation).length) {
-    for (const [key, value] of Object.entries(updateUserInformation)) {
-      modifiedUpdatedData[`name.${key}`] = value;
-    }
-  }
+//   if (updateUserInformation && Object.keys(updateUserInformation).length) {
+//     for (const [key, value] of Object.entries(updateUserInformation)) {
+//       modifiedUpdatedData[`name.${key}`] = value;
+//     }
+//   }
 
-  const result = await UserModel.findOneAndUpdate(
-    { _id: userId },
-    modifiedUpdatedData,
-    { new: true, runValidators: true },
-  );
-  return result;
-};
+//   const result = await UserModel.findOneAndUpdate(
+//     { _id: userId },
+//     modifiedUpdatedData,
+//     { new: true, runValidators: true },
+//   );
+//   return result;
+// };
 
 const deleteUser = async (userId: string) => {
   const session = await mongoose.startSession();
@@ -254,8 +338,8 @@ export const userService = {
   register,
   login,
   getAllUserUserFromDb,
-  getSingleUserById,
-  updateUserInformation,
+  singleUser,
+  updateSingleUser,
   deleteUser,
   // addOrderToUser,
   // getSingleUserOrderFromDb,

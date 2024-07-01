@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+const AddressSchema = z.object({
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
+});
+
 export const RegisterSchema = z.object({
   body: z.object({
     password: z.string().min(6),
@@ -10,8 +18,10 @@ export const RegisterSchema = z.object({
       phone: z.string().min(1),
       email: z.string().email(),
     }),
+    shippingAddress: AddressSchema.optional(),
+    // billingAddress: AddressSchema.optional(),
+    isDelete: z.boolean().default(false)
   })
-  
   })
   .refine((data) => data.body.password === data.body.confirmPassword, {
     message: "Passwords don't match",
