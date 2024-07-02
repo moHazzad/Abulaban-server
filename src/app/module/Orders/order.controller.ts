@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { orderService } from './order.service';
 // import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 import AppError from '../../Error/errors/AppError';
+import { LanguageKey } from '../../utils/Common.interface';
 
 const placeOrder = catchAsync(async (req: Request, res: Response) => {
   // console.log(req.body);
@@ -34,6 +35,49 @@ const placeOrder = catchAsync(async (req: Request, res: Response) => {
   //   });
   // }
 });
+
+
+const getOrderById  = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let { lang } = req.query;
+  const { orderId } = req.params;
+
+  // Set default language to 'ar' if not provided or invalid
+  if (lang !== 'en' && lang !== 'ar') {
+    lang = 'ar';
+  }
+
+  try {
+    const products = await orderService.singleOrderById( orderId, lang as LanguageKey, );
+    return res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    next(error);
+  }
+  }
+
+const getUserOrdersController   = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let { lang } = req.query;
+  const { userId  } = req.params;
+
+  // Set default language to 'ar' if not provided or invalid
+  if (lang !== 'en' && lang !== 'ar') {
+    lang = 'ar';
+  }
+
+  try {
+    const orders = await orderService.getUserOrders( userId , lang as LanguageKey, );
+    return res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    next(error);
+  }
+  }
 
 
 // const bookingRoom = catchAsync(async (req: Request, res: Response) => {
@@ -96,7 +140,9 @@ const placeOrder = catchAsync(async (req: Request, res: Response) => {
 // });
 
 export const orderController = {
-  placeOrder
+  placeOrder,
+  getOrderById,
+  getUserOrdersController
   // bookingRoom,
   // getAllBookingRooms,
   // getSingleBookedRoom

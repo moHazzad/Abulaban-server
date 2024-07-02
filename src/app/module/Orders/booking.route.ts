@@ -14,6 +14,8 @@ const router = express.Router()
 
 // router.get('/',isAdmin( USER_ROLE.admin), createBookingController.getAllBookingRooms )
 // router.get('/:userEmail',isAdmin(USER_ROLE.admin, USER_ROLE.user), createBookingController.getSingleBookedRoom )
+router.get('/:userId', isAdmin(USER_ROLE.admin, USER_ROLE.user), orderController.getUserOrdersController )
+router.get('/order/:orderId', orderController.getOrderById )
 router.post('/', isAdmin(USER_ROLE.admin, USER_ROLE.super ,USER_ROLE.user), validateRequest(OrderSchema), orderController.placeOrder)
 // router.put('/:userId', createUserController.updateSingleUser )
 // router.post('/', validateRequest(userValidationSchemaZod), createUserController.createUser )

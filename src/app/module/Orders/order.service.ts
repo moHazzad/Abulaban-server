@@ -11,7 +11,10 @@ import httpStatus from 'http-status';
 // import { OrderInput } from './order.validation';
 import { ProductModel } from '../Products/products.model';
 import OrderModel from './order.model';
-import { IOrder } from './order.interface';
+import { IOrder, OrderItem } from './order.interface';
+import { User } from '../user/user.interface';
+import { LanguageKey } from '../../utils/Common.interface';
+import { Product } from '../Products/product.interface';
 
 const createOrder = async (orderInput: Partial<IOrder>) => {
   if (!orderInput.cartItems || orderInput.cartItems.length === 0) {
@@ -27,9 +30,14 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
     // Calculate total
     let total = 0;
     for (const item of cartItems) {
-      const product = await ProductModel.findById(item.product).session(session).exec();
+      const product = await ProductModel.findById(item.product)
+        .session(session)
+        .exec();
       if (!product) {
-        throw new AppError(httpStatus.NOT_FOUND, `Product with ID ${item.product} not found`);
+        throw new AppError(
+          httpStatus.NOT_FOUND,
+          `Product with ID ${item.product} not found`,
+        );
       }
       total += product.price * item.quantity;
     }
@@ -51,9 +59,109 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create order', error.message);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to create order',
+      error.message,
+    );
   }
 };
+
+const singleOrderById = async (orderId: string, lang: LanguageKey) => {
+  try {
+    const order = await OrderModel.findById(orderId)
+      .populate<{ userId: User }>('userId')
+      .populate<{ cartItems: OrderItem[] }>({
+        path: 'cartItems.product',
+        select: 'name desc price imageURLs',
+        model: ProductModel,
+      })
+      .lean();
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    // Calculate total
+    let total = 0;
+    order.cartItems.forEach((item) => {
+      const product = item.product as Product;
+      total += product.price * item.quantity;
+    });
+
+    // Add shipping cost
+    total += 20;
+
+    // Populate product names based on the language
+    const updatedCartItems = order.cartItems.map((item) => {
+      const product = item.product as Product;
+      return {
+        ...item,
+        product: {
+          ...product,
+          name: product.name[lang],
+          desc: product.desc[lang],
+        },
+      };
+    });
+
+    return {
+      ...order,
+      cartItems: updatedCartItems,
+      total,
+    };
+  } catch (error: any) {
+    throw new Error(`Failed to get order: ${error.message}`);
+  }
+};
+
+const getUserOrders = async (userId: string, lang: LanguageKey) => {
+  try {
+    const orders = await OrderModel.find({ userId })
+      .populate<{ userId: User }>('userId')
+      .populate<{ cartItems: OrderItem[] }>({
+        path: 'cartItems.product',
+        select: 'name desc price imageURLs',
+        model: ProductModel,
+      })
+      .sort({ createdAt: -1 }) // Sort by most recent
+      .lean();
+
+    if (!orders || orders.length === 0) {
+      throw new Error('No orders found for this user');
+    }
+
+    // Calculate totals and populate product names based on the language
+    const updatedOrders = orders.map((order) => {
+      let total = 0;
+      const updatedCartItems = order.cartItems.map((item) => {
+        const product = item.product as Product;
+        total += product.price * item.quantity;
+        return {
+          ...item,
+          product: {
+            ...product,
+            name: product.name[lang],
+            desc: product.desc[lang],
+          },
+        };
+      });
+
+      total += 20; // Add shipping cost
+
+      return {
+        ...order,
+        cartItems: updatedCartItems,
+        total,
+      };
+    });
+
+    return updatedOrders;
+  } catch (error: any) {
+    throw new Error(`Failed to get user orders: ${error.message}`);
+  }
+};
+
 
 //  const createOrder = async (orderInput: Partial<IOrder>) => {
 //   console.log(orderInput, 'orderInput');
@@ -93,7 +201,6 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create order', error);
 //   }
 // };
-
 
 // const createBookingInDb = async (bookingData: Partial<TBooking>) => {
 //   const session = await mongoose.startSession();
@@ -153,7 +260,6 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 //     const bookingConfirmationHtml = `<p>Your booking for ${room.title} is pending.</p><p>Total Price: ${totalWithTax}</p>`;
 //     await sendEmail(bookingData.userEmail as string, 'You have booked', bookingConfirmationHtml);
 
-
 //     await session.commitTransaction();
 //     session.endSession();
 
@@ -181,10 +287,9 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 //     // Cast the result of populate to TBookingsRoom
 //     const bookings = await BookingModel.find({ userEmail: email })
 //     .populate<{ roomId: TPopulatedRoom }>('roomId')
-//     .sort({ createdAt: -1 }) 
+//     .sort({ createdAt: -1 })
 //     .lean();
-    
-    
+
 //     if (!bookings || bookings.length === 0) {
 //       throw new AppError(httpStatus.NOT_FOUND, 'No bookings found for this email');
 //     }
@@ -196,7 +301,6 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 //           // Note: If working within a session or transaction, make sure to pass those as options to the updateOne call
 //         }
 //       }
-
 
 //     const localizedBookings = bookings.map(booking => {
 //       const localizedRoom = booking.roomId ? {
@@ -224,15 +328,10 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 //       // Rethrow the error if it's an AppError
 //       throw error;
 //     }
-    
+
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Unexpected error in getBookingByEmail');
 //   }
 // };
-
-
-
-
-
 
 // const getBookingByEmail = async (email: string, language: LanguageKey) => {
 //   const titleField = 'title[language]';
@@ -258,10 +357,9 @@ const createOrder = async (orderInput: Partial<IOrder>) => {
 
 export const orderService = {
   createOrder,
+  singleOrderById,
+  getUserOrders
   // createBookingInDb,
   // getAllBookings,
   // getBookingByEmail,
-  
-
-
 };

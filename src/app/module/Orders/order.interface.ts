@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Types } from "mongoose";
-import { Product } from "../Products/product.interface";
+// import { Product } from "../Products/product.interface";
 import { User } from "../user/user.interface";
+import { Product } from "../Products/product.interface";
 
 
 
@@ -22,9 +23,11 @@ export interface IOrder extends Document {
   cartItems: OrderItem[];
   paymentMethod: string;
   status: OrderStatus;
+  total: number;
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 
 

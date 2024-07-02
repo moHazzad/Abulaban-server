@@ -36,18 +36,6 @@ export enum ProductStatus {
   DISCONTINUED = 'discontinued'
 }
 
-// interface TBrand extends Document {
-//   Name: LocalizedString;
-// }
-
-// interface TCategory extends Document {
-//   Name: LocalizedString;
-// }
-
-// interface TSubCategory extends Document {
-//   Name: LocalizedString;
-// }
-
 export interface Product extends Document {
   modelNo: string;
   name: LocalizedString;
@@ -72,3 +60,14 @@ export interface Product extends Document {
 }
 
 export type CreateProductInput = Omit<Product, '_id' | 'updateStock' | 'deletedAt' | 'releaseDate'>;
+// interface TBrand extends Document {
+//   Name: LocalizedString;
+// }
+
+// interface TCategory extends Document {
+//   Name: LocalizedString;
+// }
+
+// interface TSubCategory extends Document {
+//   Name: LocalizedString;
+// }
