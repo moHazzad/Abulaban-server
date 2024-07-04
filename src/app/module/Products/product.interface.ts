@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { TBrand } from '../brand/brand.interface';
 import { TSubCategory } from '../sub-category/subCategory.interface';
 import { TCategory } from '../Category/Category.interface';
+import { LanguageKey } from '../../utils/Common.interface';
 
 // export interface Review extends Document {
 //   userId: Types.ObjectId;
@@ -11,6 +12,21 @@ import { TCategory } from '../Category/Category.interface';
 //   comment: string;
 //   createdAt: Date;
 // }
+
+export interface SearchParams {
+  query: string;
+  lang: string;
+  limit?: number;
+  page?: number;
+}
+
+export interface GetProductsParams {
+  lang: LanguageKey;
+  page?: number;
+  limit?: number;
+  category?: string;
+  brands?: string[];
+}
 
 interface LocalizedString {
   en: string;

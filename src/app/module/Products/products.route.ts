@@ -9,10 +9,11 @@ import { productController } from "./product.controller";
 
 const router = express.Router()
 
+router.get('/',  productController.getProductsByParamsController )
+router.get('/items',  productController.getProductsController )
+router.get('/search',  productController.searchProductsController)
 // router.get('/available',  createRoomController.availableRoomController)
-// router.get('/search',  createRoomController.searchRoomController)
 router.get('/:productId',  productController.getSingleProductController)
-router.get('/',  productController.getProductsController )
 router.get('/category/:categoryId', productController.getProductsByCategoryController);
 router.get('/subCategory/:subCategoryId', productController.getProductsBySubCategoryIdController);
 router.get('/brand/:brandId', productController.getProductsByBrandIdController);

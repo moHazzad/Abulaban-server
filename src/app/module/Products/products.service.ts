@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import mongoose from 'mongoose';
 import mongoose from 'mongoose';
-import { CreateProductInput, Product } from './product.interface';
+import { CreateProductInput, GetProductsParams, Product, SearchParams } from './product.interface';
 // import AppError from '../Error/errors/AppError';
 // import httpStatus from 'http-status';
 import { ProductModel } from './products.model';
@@ -245,8 +245,176 @@ const getProductsByLanguage = async (lang: Language) => {
   }
 };
 
+// const getProductsByParams = async ({ lang, page = 1, limit = 30, category, brands }: GetProductsParams) => {
+//   try {
+//     const query: any = { isDeleted: false };
+//     if (category) {
+//       query.$or = [
+//         { categoryId: category },
+//         { subCategoryId: category }
+//       ];
+//     }
+//     if (brands && brands.length > 0) {
+//       query.brand = { $in: brands };
+//     }
+
+//     const skip = (page - 1) * limit;
+
+//     const products = await ProductModel.find(query)
+//       .populate({
+//         path: 'brand',
+//         select: `Name.${lang}`,
+//       })
+//       .populate({
+//         path: 'categoryId',
+//         select: `Name.${lang}`,
+//       })
+//       .populate({
+//         path: 'subCategoryId',
+//         select: `Name.${lang}`,
+//       })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean();
+
+//     if (products.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+//     }
+
+//     const totalProducts = await ProductModel.countDocuments(query);
+
+//     const mappedProducts = products.map((product) => {
+//       const brand = product.brand as TBrand;
+//       const subCategory = product.subCategoryId as unknown as TSubCategory;
+//       const category = product.categoryId as unknown as TCategory;
+
+//       return {
+//         ...product,
+//         modelNo: product.modelNo,
+//         name: product.name[lang],
+//         type: product.type[lang],
+//         desc: product.desc[lang],
+//         stockQty: product.stockQty,
+//         soldQty: product.soldQty,
+//         price: product.price,
+//         previousPrice: product.previousPrice,
+//         imageURLs: product.imageURLs,
+//         Brand: {
+//           ...brand,
+//           Name: brand.Name[lang],
+//         },
+//         CategoryId: {
+//           ...category,
+//           Name: category.Name[lang],
+//         },
+//         SubCategory: {
+//           ...subCategory,
+//           Name: subCategory.Name[lang],
+//         },
+//         techSpecifications: product.techSpecifications,
+//         status: product.status,
+//         highlights: product.highlights[lang],
+//       };
+//     });
+
+//     return {
+//       products: mappedProducts,
+//       totalProducts,
+//       totalPages: Math.ceil(totalProducts / limit),
+//       currentPage: page
+//     };
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+//   }
+// };
+
 
 // get products by category id 
+
+const getProductsByParams = async ({ lang, page = 1, limit = 30, category, brands }: GetProductsParams) => {
+  try {
+    const query: any = { isDeleted: false };
+    if (category) {
+      query.$or = [
+        { categoryId: category },
+        { subCategoryId: category }
+      ];
+    }
+    if (brands && brands.length > 0) {
+      query.brand = { $in: brands };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const products = await ProductModel.find(query)
+      .populate({
+        path: 'brand',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'categoryId',
+        select: `Name.${lang}`,
+      })
+      .populate({
+        path: 'subCategoryId',
+        select: `Name.${lang}`,
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    if (products.length === 0) {
+      throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+    }
+
+    const totalProducts = await ProductModel.countDocuments(query);
+
+    const mappedProducts = products.map((product) => {
+      const brand = product.brand as TBrand;
+      const subCategory = product.subCategoryId as unknown as TSubCategory;
+      const category = product.categoryId as unknown as TCategory;
+
+      return {
+        ...product,
+        modelNo: product.modelNo,
+        name: product.name[lang],
+        type: product.type[lang],
+        desc: product.desc[lang],
+        stockQty: product.stockQty,
+        soldQty: product.soldQty,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        imageURLs: product.imageURLs,
+        Brand: {
+          ...brand,
+          Name: brand.Name[lang],
+        },
+        CategoryId: {
+          ...category,
+          Name: category.Name[lang],
+        },
+        SubCategory: {
+          ...subCategory,
+          Name: subCategory.Name[lang],
+        },
+        techSpecifications: product.techSpecifications,
+        status: product.status,
+        highlights: product.highlights[lang],
+      };
+    });
+
+    return {
+      products: mappedProducts,
+      totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page
+    };
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+  }
+};
+
+
 const getProductsByCategory = async (categoryId:string,lang: Language) => {
   try {
     const products = await ProductModel.find({ isDeleted: false, categoryId:categoryId })
@@ -461,6 +629,42 @@ const createProduct = async (
     );
   } finally {
     await session.endSession();
+  }
+};
+
+
+
+// search products 
+const searchProducts = async ({ query, lang, limit = 10, page = 1 }: SearchParams) => {
+  try {
+    const skip = (page - 1) * limit;
+    const searchQuery = {
+      $text: { $search: query },
+      isDeleted: false
+    };
+
+    const products = await ProductModel.find(searchQuery, {
+      score: { $meta: 'textScore' },
+      [`name.${lang}`]: 1,
+      [`desc.${lang}`]: 1,
+      price: 1,
+      imageURLs: 1,
+    })
+      .sort({ score: { $meta: 'textScore' } })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalProducts = await ProductModel.countDocuments(searchQuery);
+
+    return {
+      products,
+      totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page,
+    };
+  } catch (error: any) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to search products: ${error.message}`);
   }
 };
 
@@ -704,7 +908,9 @@ export const productService = {
   getProductsByCategory,
   getProductsBySubCategoryId,
   getProductById,
-  getProductsByBrandId
+  getProductsByBrandId,
+  getProductsByParams,
+  searchProducts
   
   // getProductById,
   // getProductByBrandId,

@@ -54,6 +54,15 @@ const ProductSchema = new Schema<Product>({
   // reviews: { type: [ReviewSchema], default: [] },
 }, { timestamps: true });
 
+// Create full-text index
+ProductSchema.index({
+  'name.en': 'text',
+  'name.ar': 'text',
+  'desc.en': 'text',
+  'desc.ar': 'text',
+});
+
+
 // Update stock method
 ProductSchema.methods.updateStock = async function (quantity: number) {
   this.stockQty -= quantity;
