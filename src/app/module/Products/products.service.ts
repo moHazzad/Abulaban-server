@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import mongoose from 'mongoose';
 import mongoose from 'mongoose';
-import { CreateProductInput, GetProductsParams, Product, SearchParams } from './product.interface';
+import { CreateProductInput, GetProductsParams, Product, } from './product.interface';
 // import AppError from '../Error/errors/AppError';
 // import httpStatus from 'http-status';
 import { ProductModel } from './products.model';
@@ -635,38 +635,86 @@ const createProduct = async (
 
 
 // search products 
-const searchProducts = async ({ query, lang, limit = 10, page = 1 }: SearchParams) => {
+// const searchProducts = async ({ query, lang, limit = 10, page = 1 }: SearchParams) => {
+//   try {
+//     const skip = (page - 1) * limit;
+//     const searchQuery = {
+//       $text: { $search: query },
+//       isDeleted: false
+//     };
+
+//     const products = await ProductModel.find(searchQuery, {
+//       score: { $meta: 'textScore' },
+//       [`name.${lang}`]: 1,
+//       [`desc.${lang}`]: 1,
+//       price: 1,
+//       imageURLs: 1,
+//     })
+//       .sort({ score: { $meta: 'textScore' } })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean();
+
+//     const totalProducts = await ProductModel.countDocuments(searchQuery);
+
+//     return {
+//       products,
+//       totalProducts,
+//       totalPages: Math.ceil(totalProducts / limit),
+//       currentPage: page,
+//     };
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to search products: ${error.message}`);
+//   }
+// };
+
+const searchProducts = async (query: string, lang: string): Promise<Product[]> => {
   try {
-    const skip = (page - 1) * limit;
-    const searchQuery = {
-      $text: { $search: query },
-      isDeleted: false
-    };
+    const products = await ProductModel.find({
+      $or: [
+        { [`name.${lang}`]: { $regex: query, $options: 'i' } },
+        { [`desc.${lang}`]: { $regex: query, $options: 'i' } },
+        { modelNo: { $regex: query, $options: 'i' } }
+      ],
+      isDeleted: false,
+    }).lean().exec();
 
-    const products = await ProductModel.find(searchQuery, {
-      score: { $meta: 'textScore' },
-      [`name.${lang}`]: 1,
-      [`desc.${lang}`]: 1,
-      price: 1,
-      imageURLs: 1,
-    })
-      .sort({ score: { $meta: 'textScore' } })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const totalProducts = await ProductModel.countDocuments(searchQuery);
-
-    return {
-      products,
-      totalProducts,
-      totalPages: Math.ceil(totalProducts / limit),
-      currentPage: page,
-    };
+    return products.map((product: any) => ({
+      ...product,
+      name: product.name[lang],
+      desc: product.desc[lang],
+      type: product.type[lang],
+      highlights: product.highlights[lang],
+    }));
   } catch (error: any) {
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to search products: ${error.message}`);
+    throw new Error(`Failed to search products: ${error.message}`);
   }
 };
+// const searchProducts = async (query: string, lang: string):Promise<Product[]> => {
+//   try {
+//     const products = await ProductModel.find({
+//       $or: [
+//         { [`name.${lang}`]: { $regex: query, $options: 'i' } },
+//         { [`desc.${lang}`]: { $regex: query, $options: 'i' } },
+//         { modelNo: { $regex: query, $options: 'i' } }
+//       ],
+//       isDeleted: false,
+//     }).lean() as Product ;
+    
+
+//     return products.map((product: any) => ({
+//       ...product,
+//       name: product.name[lang],
+//       desc: product.desc[lang],
+//       type: product.type[lang],
+//       highlights: product.highlights[lang],
+//     }));
+//   } catch (error:any) {
+//     throw new Error(`Failed to search products: ${error.message}`);
+//   }
+// };
+
+
 
 // get  products by id
 

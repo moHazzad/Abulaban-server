@@ -28,12 +28,12 @@ export interface GetProductsParams {
   brands?: string[];
 }
 
-interface LocalizedString {
+export interface LocalizedString {
   en: string;
   ar: string;
 }
 
-interface LocalizedHighlights {
+export interface LocalizedHighlights {
   en: string[];
   ar: string[];
 }

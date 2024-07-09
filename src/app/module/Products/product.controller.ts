@@ -174,27 +174,22 @@ if (lang !== 'en' && lang !== 'ar') {
 
 
 // search products
-const searchProductsController = async (req: Request, res: Response, next: NextFunction) => {
-  const { query, lang = 'en', page = '1', limit = '10' } = req.query as {
-    query: string;
-    lang: string;
-    page: string;
-    limit: string;
-  };
+export const searchProductsController = async (req: Request, res: Response, next: NextFunction) => {
+  const { query, lang } = req.query as { query: string; lang: string };
 
-  console.log( query, limit, page ,lang, 'search ');
+  // Set default language to 'ar' if not provided or invalid
+  // if (lang !== 'en' && lang !== 'ar') {
+  //   lang = 'ar';
+  // }
+
+  console.log(query, lang, 'search');
 
   if (!query) {
     return res.status(400).json({ error: 'Search query is required' });
   }
 
   try {
-    const result = await productService.searchProducts({
-      query,
-      lang,
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
-    });
+    const result = await productService.searchProducts(query, lang);
     return res.status(200).json({ success: true, data: result });
   } catch (error) {
     next(error);
