@@ -58,6 +58,28 @@ const getSubCategoryController = catchAsync(async (req: Request, res: Response) 
     }
 });
 
+const getSubCategoryByIdController = catchAsync(async (req: Request, res: Response) => {
+  // Extract language preference from request query or default to 'en'
+  const lang: LanguageKey = (req.query.lang as LanguageKey) || 'en';
+  const { subCategoryId } = req.params;
+
+  try {
+    // Use the service to get localized subcategory
+    const subCategory = await subCategoryService.getSingleSubCategoryById(subCategoryId, lang);
+
+    // Send back a success response with the fetched subcategory
+    res.status(httpStatus.OK).json({
+      message: 'Subcategory successfully fetched',
+      data: subCategory,
+    });
+  } catch (error: any) {
+    // Send back an error response
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred', error: error.message });
+  }
+});
+
+
+
 const getSubCategoryByCategoryIdController = catchAsync(async (req: Request, res: Response) => {
     // Extract language preference from request query or default to 'en'
     const lang: LanguageKey = req.query.lang as LanguageKey || 'ar';
@@ -123,7 +145,8 @@ const getSubCategoryByCategoryIdController = catchAsync(async (req: Request, res
 export const SubCategoryController = {
   createSubCategoryController,
   getSubCategoryController,
-  getSubCategoryByCategoryIdController
+  getSubCategoryByCategoryIdController,
+  getSubCategoryByIdController
   // deleteSubCategoryController,
   // editSubCategoryController
 };

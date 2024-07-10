@@ -9,6 +9,7 @@ import { SubCategoryController } from './subCategory.controller'
 const router = express.Router()
 
 router.get('/', SubCategoryController.getSubCategoryController )
+router.get('/subCategory/:subCategoryId', SubCategoryController.getSubCategoryByIdController )
 router.get('/:categoryId', SubCategoryController.getSubCategoryByCategoryIdController )
 router.post('/create',  validateRequest(TSubCategorySchema), SubCategoryController.createSubCategoryController )
 // router.put('/:categoryId', SubCategoryController.editSubCategoryController);

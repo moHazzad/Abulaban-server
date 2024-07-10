@@ -51,7 +51,7 @@ const getProductsController = async (
 //   }
 // };
 const getProductsByParamsController = async (req: Request, res: Response, next: NextFunction) => {
-  const { lang = 'en', page = '1', limit = '10', category, brands } = req.query;
+  const { lang = 'en', page = '1', limit = '20', category, brands } = req.query;
   const brandArray = brands ? (brands as string).split(',') : [];
 
   console.log(req.query, 'hit the search ');

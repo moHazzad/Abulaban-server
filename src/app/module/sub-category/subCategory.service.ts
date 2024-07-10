@@ -129,6 +129,35 @@ const getSubCategories = async (lang: LanguageKey): Promise<any> => {
   });
 };
 
+const getSingleSubCategoryById = async (subCategoryId: string, lang: LanguageKey): Promise<any> => {
+  // Fetch subcategory and populate CategoryId
+  const subCategory = await SubCategoryModel.findById(subCategoryId)
+    .populate({
+      path: 'CategoryId',
+      select: `Name.${lang} Name.ar image`,
+    })
+    .lean();
+
+  if (!subCategory) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No subcategory found');
+  }
+
+  // Map over subcategory and return localized fields
+  const populatedCategory = subCategory.CategoryId as TCategory;
+
+  return {
+    _id: subCategory._id,
+    Name: subCategory.Name[lang],
+    image: subCategory.image,
+    Category: {
+      _id: populatedCategory._id,
+      Name: populatedCategory.Name[lang],
+      image: populatedCategory.image,
+    }
+  };
+};
+
+
 // get subcategoris by category id 
 const getSubCategoriesByCategoryId = async (lang: LanguageKey, categoryId:string ): Promise<any> => {
   // Fetch subcategories and populate CategoryId
@@ -226,7 +255,8 @@ const getSubCategoriesByCategoryId = async (lang: LanguageKey, categoryId:string
 export const subCategoryService = {
   createSubCategoryDb,
   getSubCategories,
-  getSubCategoriesByCategoryId
+  getSubCategoriesByCategoryId,
+  getSingleSubCategoryById
   // deleteSubCategory,
   // editSubCategory
 };

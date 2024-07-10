@@ -33,6 +33,7 @@ const TechSpecificationSchema = new Schema({
 // Product schema
 const ProductSchema = new Schema<Product>({
   modelNo: { type: String, required: true },
+  sku: { type: String, required: true },
   name: { type: LocalizedStringSchema, required: true },
   type: { type: LocalizedStringSchema, required: true },
   brand: { type: Schema.Types.ObjectId, ref: 'Brand', required: true },

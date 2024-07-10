@@ -54,6 +54,7 @@ export enum ProductStatus {
 
 export interface Product extends Document {
   modelNo: string;
+  sku:string;
   name: LocalizedString;
   brand: Types.ObjectId | TBrand;
   desc: LocalizedString;
