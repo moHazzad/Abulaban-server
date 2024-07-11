@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use((err, req, res) => {
     // Log the error for server-side debugging
-    console.error(err);
+    console.error(err, 'form app file');
     // Process the error using your errorPreprocessor function or similar
     const { statusCode, message, issues } = (0, errorPreprocessor_1.default)(err);
     res.status(statusCode).json({
