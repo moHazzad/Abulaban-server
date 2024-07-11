@@ -14,6 +14,8 @@ const subCategory_route_1 = require("../module/sub-category/subCategory.route");
 // import { MainCategoryRoute } from '../module/Category/Category.route';
 const brand_route_1 = require("../module/brand/brand.route");
 const Category_route_1 = require("../module/Category/Category.route");
+const user_route_1 = require("../module/user/user.route");
+const booking_route_1 = require("../module/Orders/booking.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     // {
@@ -21,13 +23,13 @@ const moduleRoutes = [
     //   route: authRoutes,
     // },
     // {
-    //   path: '/user',
-    //   route: UserRoute,
-    // },
-    // {
     //   path: '/room',
     //   route: RoomRoute,
     // },
+    {
+        path: '/user',
+        route: user_route_1.UserRoute,
+    },
     {
         path: '/category',
         route: Category_route_1.categoryRoute
@@ -44,10 +46,10 @@ const moduleRoutes = [
         path: '/products',
         route: products_route_1.productRoute,
     },
-    // {
-    //   path: '/booking',
-    //   route: bookingRoute,
-    // },
+    {
+        path: '/orders',
+        route: booking_route_1.orderRoute,
+    },
     // {
     //   path: '/review',
     //   route: RoomReviewRoute,

@@ -32,6 +32,7 @@ const productStatusSchema = zod_1.z.enum([
 const ProductValidationSchema = zod_1.z.object({
     body: zod_1.z.object({
         modelNo: zod_1.z.string().min(1, 'Model number is required'),
+        sku: zod_1.z.string().min(1, 'Model number is required'),
         name: localizedStringSchema,
         type: localizedStringSchema,
         brand: objectIdSchema,

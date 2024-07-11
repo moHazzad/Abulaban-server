@@ -12,6 +12,7 @@ const subCategory_controller_1 = require("./subCategory.controller");
 // import { USER_ROLE } from '../../conestants/user.contents'
 const router = express_1.default.Router();
 router.get('/', subCategory_controller_1.SubCategoryController.getSubCategoryController);
+router.get('/subCategory/:subCategoryId', subCategory_controller_1.SubCategoryController.getSubCategoryByIdController);
 router.get('/:categoryId', subCategory_controller_1.SubCategoryController.getSubCategoryByCategoryIdController);
 router.post('/create', (0, validateRequest_1.validateRequest)(subCategory_validation_1.default), subCategory_controller_1.SubCategoryController.createSubCategoryController);
 // router.put('/:categoryId', SubCategoryController.editSubCategoryController);

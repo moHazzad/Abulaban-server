@@ -18,56 +18,38 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
-const user_interface_1 = require("./user.interface");
+// import { UserRole } from "./user.interface";
 // import userValidationSchemaZod from "./user.validation";
-const createUserController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // const user = req.body
-    //saving to db
+const registerUserController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(req.body, 'register');
     try {
-        const result = yield user_service_1.userService.createUser(req.body, user_interface_1.UserRole.User);
+        const result = yield user_service_1.userService.register(req.body);
         res.status(200).json({
             success: true,
-            message: 'user is created successfully',
+            message: 'User created successfully',
             data: result,
         });
     }
     catch (error) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `user is not create ${error.message}`);
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `User not created: ${error.message}`);
     }
 }));
-const createAdminController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // const user = req.body
-    //saving to db
+const loginUserController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield user_service_1.userService.createUser(req.body, user_interface_1.UserRole.Admin);
+        const result = yield user_service_1.userService.login(req.body);
         res.status(200).json({
             success: true,
-            message: 'user is created successfully',
+            message: 'User logged in successfully',
             data: result,
         });
     }
     catch (error) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `user is not create ${error.message}`);
-    }
-}));
-const allUsers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_service_1.userService.getAllUserUserFromDb();
-    if (!users) {
-        return res
-            .status(404)
-            .json({ success: false, message: 'No users found' });
-    }
-    else {
-        res.status(200).json({
-            success: true,
-            message: 'users data are retrieved',
-            data: users,
-        });
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `Filed to login: ${error.message}`);
     }
 }));
 const singleUserById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = (req.params.userId);
-    const user = yield user_service_1.userService.getSingleUserById(userId);
+    const user = yield user_service_1.userService.singleUser(userId);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'user is not found');
     }
@@ -81,11 +63,13 @@ const singleUserById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
     }
 }));
 // update user info 
-const updateSingleUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateSingleUserController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // getting user id to find the exect user and the body of update info 
     const userId = (req.params.userId);
     const updateInfo = req.body;
-    const updateUser = yield user_service_1.userService.updateUserInformation(userId, updateInfo);
+    console.log(updateInfo, 'data ');
+    console.log(userId, 'isss');
+    const updateUser = yield user_service_1.userService.updateSingleUser(userId, updateInfo);
     if (!updateUser) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Invalid user Id or Update Information");
     }
@@ -98,21 +82,52 @@ const updateSingleUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         });
     }
 }));
-const deleteSingleUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.params.userId;
-    const result = yield user_service_1.userService.deleteUser(userId);
-    if (!result) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No user with given ID was found.');
-    }
-    else {
-        (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.OK,
-            success: true,
-            message: "Delete Successfull",
-            data: null
-        });
-    }
-}));
+// const createAdminController  = catchAsync(async(req: Request, res: Response) =>{
+//     // const user = req.body
+//     //saving to db
+//     try {
+//       const result = await userService.createUser(req.body, UserRole.Admin);
+//       res.status(200).json({
+//         success: true,
+//         message: 'user is created successfully',
+//         data: result,
+//       });
+//     } catch (error: any) {
+//       throw new AppError( httpStatus.BAD_REQUEST,`user is not create ${error.message}`)
+//     }
+// })
+// const allUsers = catchAsync(async(req: Request, res: Response)=>{
+//         const users = await userService.getAllUserUserFromDb()
+//         if (!users) {
+//             return res
+//               .status(404)
+//               .json({ success: false, message: 'No users found' });
+//           } else {
+//             res.status(200).json({
+//               success: true,
+//               message: 'users data are retrieved',
+//               data: users,
+//             });
+//           }
+// })
+// const deleteSingleUser = catchAsync(async (req: Request, res:Response) => {
+//   const userId = req.params.userId
+//   const result = await userService.deleteUser(userId)
+//       if (!result) {
+//         throw new AppError(
+//           httpStatus.NOT_FOUND,
+//           'No user with given ID was found.'
+//         )
+//       } else {
+//           sendResponse(res,{
+//             statusCode: httpStatus.OK,
+//             success: true,
+//             message:"Delete Successfull",
+//             data: null
+//           }
+//           )
+//       }
+// })
 // const addOrderToUserController = async(req: Request, res:Response)=>{
 //     const userId = parseInt(req.params.userId)
 //     const order = req.body;
@@ -196,12 +211,13 @@ const deleteSingleUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 
 // }
 exports.userController = {
     // createUser,
-    createUserController,
-    createAdminController,
-    allUsers,
+    registerUserController,
+    loginUserController,
     singleUserById,
-    updateSingleUser,
-    deleteSingleUser,
+    updateSingleUserController
+    // allUsers,
+    // updateSingleUser,
+    // deleteSingleUser,
     // addOrderToUserController,
     // getSingleUserOrder,
     // getOrderTotalPrice

@@ -63,7 +63,7 @@ const getBrandNames = (lang) => __awaiter(void 0, void 0, void 0, function* () {
     // Extract the _id and names in the specified language
     const brandNames = brands.map((brand) => ({
         _id: brand._id,
-        name: brand.Name[lang],
+        Name: brand.Name[lang],
         image: brand.image
     }));
     return brandNames;
@@ -76,7 +76,7 @@ const getBrandById = (id, lang) => __awaiter(void 0, void 0, void 0, function* (
     }
     return {
         _id: brand._id,
-        name: brand.Name[lang]
+        Name: brand.Name[lang]
     };
 });
 exports.brandService = {

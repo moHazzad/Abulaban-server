@@ -61,6 +61,24 @@ const getSubCategoryController = (0, catchAsync_1.default)((req, res) => __await
         res.status(http_status_1.default.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred', error: error.message });
     }
 }));
+const getSubCategoryByIdController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // Extract language preference from request query or default to 'en'
+    const lang = req.query.lang || 'en';
+    const { subCategoryId } = req.params;
+    try {
+        // Use the service to get localized subcategory
+        const subCategory = yield subCategory_service_1.subCategoryService.getSingleSubCategoryById(subCategoryId, lang);
+        // Send back a success response with the fetched subcategory
+        res.status(http_status_1.default.OK).json({
+            message: 'Subcategory successfully fetched',
+            data: subCategory,
+        });
+    }
+    catch (error) {
+        // Send back an error response
+        res.status(http_status_1.default.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred', error: error.message });
+    }
+}));
 const getSubCategoryByCategoryIdController = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Extract language preference from request query or default to 'en'
     const lang = req.query.lang || 'ar';
@@ -118,7 +136,8 @@ const getSubCategoryByCategoryIdController = (0, catchAsync_1.default)((req, res
 exports.SubCategoryController = {
     createSubCategoryController,
     getSubCategoryController,
-    getSubCategoryByCategoryIdController
+    getSubCategoryByCategoryIdController,
+    getSubCategoryByIdController
     // deleteSubCategoryController,
     // editSubCategoryController
 };

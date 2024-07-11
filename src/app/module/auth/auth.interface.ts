@@ -1,13 +1,13 @@
-import { TUser } from "../user/user.interface";
+// import { TUser } from "../user/user.interface";
 
-export interface TResister extends Omit<TUser, 'role'> {}
+// export interface TResister extends Omit<TUser, 'role'> {}
 
-export interface TLogin {
+// export interface TLogin {
     
-    email: string;
-    password: string;
+//     email: string;
+//     password: string;
 
 
-}
+// }
 
 

@@ -26,6 +26,9 @@ const products_model_1 = require("./products.model");
 // import { ZodError } from 'zod';
 const AppError_1 = __importDefault(require("../../Error/errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
+// import { TBrand } from '../brand/brand.interface';
+// import { TSubCategory } from '../sub-category/subCategory.interface';
+// import { TCategory } from '../Category/Category.interface';
 // import { TBrand } from '../module/brand/brand.interface';
 // import { TSubCategory } from '../module/sub-category/subCategory.interface';
 // import { Language } from './product.controller';
@@ -117,6 +120,37 @@ const http_status_1 = __importDefault(require("http-status"));
 //     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
 //   }
 // };
+const getProductById = (productId, lang) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const product = yield products_model_1.ProductModel.findById({ isDeleted: false, _id: productId })
+            .populate({
+            path: 'brand',
+            // select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'categoryId',
+            // select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'subCategoryId',
+            select: `Name.${lang}`,
+        }).lean();
+        if (!product) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Product not found');
+        }
+        const brand = product.brand;
+        const category = product.categoryId;
+        const subCategory = product.subCategoryId;
+        // Extract and return the localized fields based on the requested language
+        const localizedProduct = Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], 
+            // brand: product.brand.Name[lang],
+            desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
+        return localizedProduct;
+    }
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, `Failed to get product: ${error}`);
+    }
+});
 const getProductsByLanguage = (lang) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield products_model_1.ProductModel.find({ isDeleted: false })
@@ -140,31 +174,141 @@ const getProductsByLanguage = (lang) => __awaiter(void 0, void 0, void 0, functi
             const brand = product.brand;
             const subCategory = product.subCategoryId;
             const category = product.categoryId;
-            return {
-                modelNo: product.modelNo,
-                name: product.name[lang],
-                type: product.type[lang],
+            return Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], 
                 // brand: product.brand.Name[lang],
-                desc: product.desc[lang],
-                stockQty: product.stockQty,
-                soldQty: product.soldQty,
-                price: product.price,
-                previousPrice: product.previousPrice,
-                imageURLs: product.imageURLs,
-                Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang] }),
-                CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }),
-                subCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }),
-                techSpecifications: product.techSpecifications,
-                status: product.status,
-                highlights: product.highlights[lang],
-            };
+                desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang] }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
         });
     }
     catch (error) {
         throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
     }
 });
+// const getProductsByParams = async ({ lang, page = 1, limit = 30, category, brands }: GetProductsParams) => {
+//   try {
+//     const query: any = { isDeleted: false };
+//     if (category) {
+//       query.$or = [
+//         { categoryId: category },
+//         { subCategoryId: category }
+//       ];
+//     }
+//     if (brands && brands.length > 0) {
+//       query.brand = { $in: brands };
+//     }
+//     const skip = (page - 1) * limit;
+//     const products = await ProductModel.find(query)
+//       .populate({
+//         path: 'brand',
+//         select: `Name.${lang}`,
+//       })
+//       .populate({
+//         path: 'categoryId',
+//         select: `Name.${lang}`,
+//       })
+//       .populate({
+//         path: 'subCategoryId',
+//         select: `Name.${lang}`,
+//       })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean();
+//     if (products.length === 0) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'No products found');
+//     }
+//     const totalProducts = await ProductModel.countDocuments(query);
+//     const mappedProducts = products.map((product) => {
+//       const brand = product.brand as TBrand;
+//       const subCategory = product.subCategoryId as unknown as TSubCategory;
+//       const category = product.categoryId as unknown as TCategory;
+//       return {
+//         ...product,
+//         modelNo: product.modelNo,
+//         name: product.name[lang],
+//         type: product.type[lang],
+//         desc: product.desc[lang],
+//         stockQty: product.stockQty,
+//         soldQty: product.soldQty,
+//         price: product.price,
+//         previousPrice: product.previousPrice,
+//         imageURLs: product.imageURLs,
+//         Brand: {
+//           ...brand,
+//           Name: brand.Name[lang],
+//         },
+//         CategoryId: {
+//           ...category,
+//           Name: category.Name[lang],
+//         },
+//         SubCategory: {
+//           ...subCategory,
+//           Name: subCategory.Name[lang],
+//         },
+//         techSpecifications: product.techSpecifications,
+//         status: product.status,
+//         highlights: product.highlights[lang],
+//       };
+//     });
+//     return {
+//       products: mappedProducts,
+//       totalProducts,
+//       totalPages: Math.ceil(totalProducts / limit),
+//       currentPage: page
+//     };
+//   } catch (error: any) {
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+//   }
+// };
 // get products by category id 
+const getProductsByParams = ({ lang, page = 1, limit = 30, category, brands }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const query = { isDeleted: false };
+        if (category) {
+            query.$or = [
+                { categoryId: category },
+                { subCategoryId: category }
+            ];
+        }
+        if (brands && brands.length > 0) {
+            query.brand = { $in: brands };
+        }
+        const skip = (page - 1) * limit;
+        const products = yield products_model_1.ProductModel.find(query)
+            .populate({
+            path: 'brand',
+            select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'categoryId',
+            select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'subCategoryId',
+            select: `Name.${lang}`,
+        })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+        if (products.length === 0) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No products found');
+        }
+        const totalProducts = yield products_model_1.ProductModel.countDocuments(query);
+        const mappedProducts = products.map((product) => {
+            const brand = product.brand;
+            const subCategory = product.subCategoryId;
+            const category = product.categoryId;
+            return Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang] }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
+        });
+        return {
+            products: mappedProducts,
+            totalProducts,
+            totalPages: Math.ceil(totalProducts / limit),
+            currentPage: page
+        };
+    }
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+    }
+});
 const getProductsByCategory = (categoryId, lang) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield products_model_1.ProductModel.find({ isDeleted: false, categoryId: categoryId })
@@ -188,24 +332,9 @@ const getProductsByCategory = (categoryId, lang) => __awaiter(void 0, void 0, vo
             const brand = product.brand;
             const subCategory = product.subCategoryId;
             const category = product.categoryId;
-            return {
-                modelNo: product.modelNo,
-                name: product.name[lang],
-                type: product.type[lang],
+            return Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], 
                 // brand: product.brand.Name[lang],
-                desc: product.desc[lang],
-                stockQty: product.stockQty,
-                soldQty: product.soldQty,
-                price: product.price,
-                previousPrice: product.previousPrice,
-                imageURLs: product.imageURLs,
-                Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }),
-                CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }),
-                subCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }),
-                techSpecifications: product.techSpecifications,
-                status: product.status,
-                highlights: product.highlights[lang],
-            };
+                desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
         });
     }
     catch (error) {
@@ -236,24 +365,42 @@ const getProductsBySubCategoryId = (subCategoryId, lang) => __awaiter(void 0, vo
             const brand = product.brand;
             const subCategory = product.subCategoryId;
             const category = product.categoryId;
-            return {
-                modelNo: product.modelNo,
-                name: product.name[lang],
-                type: product.type[lang],
+            return Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], 
                 // brand: product.brand.Name[lang],
-                desc: product.desc[lang],
-                stockQty: product.stockQty,
-                soldQty: product.soldQty,
-                price: product.price,
-                previousPrice: product.previousPrice,
-                imageURLs: product.imageURLs,
-                Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }),
-                CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }),
-                subCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }),
-                techSpecifications: product.techSpecifications,
-                status: product.status,
-                highlights: product.highlights[lang],
-            };
+                desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
+        });
+    }
+    catch (error) {
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, `Failed to get products: ${error.message}`);
+    }
+});
+// get products but brnad 
+const getProductsByBrandId = (brandId, lang) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const products = yield products_model_1.ProductModel.find({ isDeleted: false, brand: brandId })
+            .populate({
+            path: 'brand',
+            select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'categoryId',
+            select: `Name.${lang}`,
+        })
+            .populate({
+            path: 'subCategoryId',
+            select: `Name.${lang}`,
+        })
+            .lean();
+        if (products.length === 0) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No products found');
+        }
+        return products.map((product) => {
+            const brand = product.brand;
+            const subCategory = product.subCategoryId;
+            const category = product.categoryId;
+            return Object.assign(Object.assign({}, product), { modelNo: product.modelNo, name: product.name[lang], type: product.type[lang], 
+                // brand: product.brand.Name[lang],
+                desc: product.desc[lang], stockQty: product.stockQty, soldQty: product.soldQty, price: product.price, previousPrice: product.previousPrice, imageURLs: product.imageURLs, Brand: Object.assign(Object.assign({}, brand), { Name: brand.Name[lang], image: brand.image }), CategoryId: Object.assign(Object.assign({}, category), { Name: category.Name[lang] }), SubCategory: Object.assign(Object.assign({}, subCategory), { Name: subCategory.Name[lang] }), techSpecifications: product.techSpecifications, status: product.status, highlights: product.highlights[lang] });
         });
     }
     catch (error) {
@@ -282,43 +429,74 @@ const createProduct = (productData) => __awaiter(void 0, void 0, void 0, functio
         yield session.endSession();
     }
 });
-// get  products by id
-// const getProductById = async (productId: string, lang: Language) => {
+// search products 
+// const searchProducts = async ({ query, lang, limit = 10, page = 1 }: SearchParams) => {
 //   try {
-//     const product = await ProductModel.findById(productId)
-//       .populate({
-//         path: 'Brand',
-//         select: `Name.${lang} Name.ar`,
-//       })
-//       .populate({
-//         path: 'CategoryId',
-//         select: `categoryTitle.${lang} categoryTitle.ar`,
-//       })
-//       .lean();
-//     if (!product) {
-//       throw new AppError(httpStatus.NOT_FOUND, 'Product not found');
-//     }
-//     const brand = product.Brand as TBrand;
-//     const category = product.CategoryId as unknown as TSubCategory;
-//     // Extract and return the localized fields based on the requested language
-//     const localizedProduct = {
-//       ...product,
-//       Name: product.Name[lang],
-//       Desc: product.Desc[lang],
-//       Brand: {
-//         ...brand,
-//         Name: brand.Name[lang],
-//       },
-//       CategoryId: {
-//         ...category,
-//         categoryTitle: category.categoryTitle[lang],
-//       },
+//     const skip = (page - 1) * limit;
+//     const searchQuery = {
+//       $text: { $search: query },
+//       isDeleted: false
 //     };
-//     return localizedProduct;
+//     const products = await ProductModel.find(searchQuery, {
+//       score: { $meta: 'textScore' },
+//       [`name.${lang}`]: 1,
+//       [`desc.${lang}`]: 1,
+//       price: 1,
+//       imageURLs: 1,
+//     })
+//       .sort({ score: { $meta: 'textScore' } })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean();
+//     const totalProducts = await ProductModel.countDocuments(searchQuery);
+//     return {
+//       products,
+//       totalProducts,
+//       totalPages: Math.ceil(totalProducts / limit),
+//       currentPage: page,
+//     };
 //   } catch (error: any) {
-//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to get product: ${error.message}`);
+//     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to search products: ${error.message}`);
 //   }
 // };
+const searchProducts = (query, lang) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const products = yield products_model_1.ProductModel.find({
+            $or: [
+                { [`name.${lang}`]: { $regex: query, $options: 'i' } },
+                { [`desc.${lang}`]: { $regex: query, $options: 'i' } },
+                { modelNo: { $regex: query, $options: 'i' } }
+            ],
+            isDeleted: false,
+        }).lean().exec();
+        return products.map((product) => (Object.assign(Object.assign({}, product), { name: product.name[lang], desc: product.desc[lang], type: product.type[lang], highlights: product.highlights[lang] })));
+    }
+    catch (error) {
+        throw new Error(`Failed to search products: ${error.message}`);
+    }
+});
+// const searchProducts = async (query: string, lang: string):Promise<Product[]> => {
+//   try {
+//     const products = await ProductModel.find({
+//       $or: [
+//         { [`name.${lang}`]: { $regex: query, $options: 'i' } },
+//         { [`desc.${lang}`]: { $regex: query, $options: 'i' } },
+//         { modelNo: { $regex: query, $options: 'i' } }
+//       ],
+//       isDeleted: false,
+//     }).lean() as Product ;
+//     return products.map((product: any) => ({
+//       ...product,
+//       name: product.name[lang],
+//       desc: product.desc[lang],
+//       type: product.type[lang],
+//       highlights: product.highlights[lang],
+//     }));
+//   } catch (error:any) {
+//     throw new Error(`Failed to search products: ${error.message}`);
+//   }
+// };
+// get  products by id
 // get products by brand id
 // const getProductByBrandId = async (brandId: string, lang: Language) => {
 //   try {
@@ -521,7 +699,11 @@ exports.productService = {
     getProductsByLanguage,
     createProduct,
     getProductsByCategory,
-    getProductsBySubCategoryId
+    getProductsBySubCategoryId,
+    getProductById,
+    getProductsByBrandId,
+    getProductsByParams,
+    searchProducts
     // getProductById,
     // getProductByBrandId,
     // getProducts,

@@ -9,9 +9,31 @@ const createToken = (jwtPayload, secret, options) => {
     return jsonwebtoken_1.default.sign(jwtPayload, secret, options);
 };
 const verifyToken = (token, secret) => {
-    return jsonwebtoken_1.default.verify(token, secret);
+    try {
+        return jsonwebtoken_1.default.verify(token, secret);
+    }
+    catch (error) {
+        throw new Error('Invalid token');
+    }
 };
 exports.jwtHelpers = {
     createToken,
     verifyToken,
 };
+// import jwt, { JwtPayload } from 'jsonwebtoken'
+// const createToken = (
+//   jwtPayload: JwtPayload,
+//   secret: string,
+//   options: {
+//     expiresIn: string
+//   },
+// ) => {
+//   return jwt.sign(jwtPayload, secret, options)
+// }
+// const verifyToken = (token: string, secret: string) => {
+//   return jwt.verify(token, secret)
+// }
+// export const jwtHelpers = {
+//   createToken,
+//   verifyToken,
+// }

@@ -122,6 +122,30 @@ const getSubCategories = (lang) => __awaiter(void 0, void 0, void 0, function* (
         };
     });
 });
+const getSingleSubCategoryById = (subCategoryId, lang) => __awaiter(void 0, void 0, void 0, function* () {
+    // Fetch subcategory and populate CategoryId
+    const subCategory = yield subCategory_model_1.SubCategoryModel.findById(subCategoryId)
+        .populate({
+        path: 'CategoryId',
+        select: `Name.${lang} Name.ar image`,
+    })
+        .lean();
+    if (!subCategory) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'No subcategory found');
+    }
+    // Map over subcategory and return localized fields
+    const populatedCategory = subCategory.CategoryId;
+    return {
+        _id: subCategory._id,
+        Name: subCategory.Name[lang],
+        image: subCategory.image,
+        Category: {
+            _id: populatedCategory._id,
+            Name: populatedCategory.Name[lang],
+            image: populatedCategory.image,
+        }
+    };
+});
 // get subcategoris by category id 
 const getSubCategoriesByCategoryId = (lang, categoryId) => __awaiter(void 0, void 0, void 0, function* () {
     // Fetch subcategories and populate CategoryId
@@ -204,7 +228,8 @@ const getSubCategoriesByCategoryId = (lang, categoryId) => __awaiter(void 0, voi
 exports.subCategoryService = {
     createSubCategoryDb,
     getSubCategories,
-    getSubCategoriesByCategoryId
+    getSubCategoriesByCategoryId,
+    getSingleSubCategoryById
     // deleteSubCategory,
     // editSubCategory
 };

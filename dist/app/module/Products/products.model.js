@@ -37,6 +37,7 @@ const TechSpecificationSchema = new mongoose_1.Schema({
 // Product schema
 const ProductSchema = new mongoose_1.Schema({
     modelNo: { type: String, required: true },
+    sku: { type: String, required: true },
     name: { type: LocalizedStringSchema, required: true },
     type: { type: LocalizedStringSchema, required: true },
     brand: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Brand', required: true },
@@ -56,6 +57,13 @@ const ProductSchema = new mongoose_1.Schema({
     deletedAt: { type: Date },
     // reviews: { type: [ReviewSchema], default: [] },
 }, { timestamps: true });
+// Create full-text index
+ProductSchema.index({
+    'name.en': 'text',
+    'name.ar': 'text',
+    'desc.en': 'text',
+    'desc.ar': 'text',
+});
 // Update stock method
 ProductSchema.methods.updateStock = function (quantity) {
     return __awaiter(this, void 0, void 0, function* () {

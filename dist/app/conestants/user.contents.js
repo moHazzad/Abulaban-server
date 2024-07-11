@@ -4,4 +4,5 @@ exports.USER_ROLE = void 0;
 exports.USER_ROLE = {
     user: 'user',
     admin: 'admin',
+    super: 'super',
 };

@@ -5,17 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRoutes = void 0;
 const express_1 = __importDefault(require("express"));
-const auth_controller_1 = require("./auth.controller");
-const validateRequest_1 = require("../../midleware/validateRequest");
-// import userValidationSchemaZod from "../user/user.validation";
-const auth_validation_1 = require("./auth.validation");
-const isAdmin_1 = __importDefault(require("../../midleware/isAdmin"));
-const user_contents_1 = require("../../conestants/user.contents");
+// import { authUserController } from "./auth.controller";
+// import { validateRequest } from "../../midleware/validateRequest";
+// // import userValidationSchemaZod from "../user/user.validation";
+// import { AuthValidation } from "./auth.validation";
+// import isAdmin from "../../midleware/isAdmin";
+// import { USER_ROLE } from "../../conestants/user.contents";
 const router = express_1.default.Router();
-router.post('/resister', (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.registerValidationSchema), auth_controller_1.authUserController.resister);
-router.post('/login', (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.loginValidationSchema), auth_controller_1.authUserController.login);
-router.post('/refresh-token', (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.refreshTokenValidationSchema), auth_controller_1.authUserController.refreshToken);
-router.post('/forget-password', (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.forgetPasswordValidationSchema), auth_controller_1.authUserController.forgetPassword);
-router.post('/reset-password', (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.resetPasswordValidationSchema), auth_controller_1.authUserController.resetPassword);
-router.patch('/changePassword', (0, isAdmin_1.default)(user_contents_1.USER_ROLE.admin, user_contents_1.USER_ROLE.user), (0, validateRequest_1.validateRequest)(auth_validation_1.AuthValidation.changePasswordValidationSchema), auth_controller_1.authUserController.login);
+// router.post('/resister',validateRequest(AuthValidation.registerValidationSchema), authUserController.resister )
+// router.post('/login',validateRequest(AuthValidation.loginValidationSchema), authUserController.login)
+// router.post('/refresh-token', validateRequest(AuthValidation.refreshTokenValidationSchema), authUserController.refreshToken );
+// router.post('/forget-password', validateRequest(AuthValidation.forgetPasswordValidationSchema), authUserController.forgetPassword );
+// router.post('/reset-password', validateRequest(AuthValidation.resetPasswordValidationSchema), authUserController.resetPassword );
+// router.patch('/changePassword', isAdmin(USER_ROLE.admin, USER_ROLE.user) ,validateRequest(AuthValidation.changePasswordValidationSchema), authUserController.login)
 exports.authRoutes = router;

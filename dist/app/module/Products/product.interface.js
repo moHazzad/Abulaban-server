@@ -8,3 +8,12 @@ var ProductStatus;
     ProductStatus["OUT_OF_STOCK"] = "out_of_stock";
     ProductStatus["DISCONTINUED"] = "discontinued";
 })(ProductStatus || (exports.ProductStatus = ProductStatus = {}));
+// interface TBrand extends Document {
+//   Name: LocalizedString;
+// }
+// interface TCategory extends Document {
+//   Name: LocalizedString;
+// }
+// interface TSubCategory extends Document {
+//   Name: LocalizedString;
+// }
